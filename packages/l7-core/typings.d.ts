@@ -1,0 +1,6 @@
+declare module '*.css';
+declare module '*.less';
+declare module '*.glsl' {
+  const value: string;
+  export default value;
+}

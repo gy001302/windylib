@@ -1,0 +1,65 @@
+{
+  "name": "@antv/l7-core",
+  "version": "2.15.2",
+  "description": "",
+  "main": "dist/index.cjs",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "sideEffects": true,
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "tsc": "tsc --project tsconfig.build.json",
+    "clean": "rm -rf dist",
+    "build:types": "tsc --project tsconfig.build.json --emitDeclarationOnly --declarationDir dist",
+    "build": "pnpm run clean && pnpm run build:types && vite build",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "watch": "vite build --watch",
+    "sync": "tnpm sync"
+  },
+  "author": "xiaoiver",
+  "license": "ISC",
+  "dependencies": {
+    "@antv/async-hook": "^2.2.9",
+    "@antv/l7-utils": "2.15.2",
+    "@babel/runtime": "^7.7.7",
+    "@turf/helpers": "^6.1.4",
+    "@windylib/until": "workspace:*",
+    "ajv": "^6.10.2",
+    "element-resize-event": "^3.0.3",
+    "eventemitter3": "^4.0.0",
+    "gl-matrix": "^3.1.0",
+    "inversify": "^5.0.1",
+    "inversify-inject-decorators": "^3.1.0",
+    "l7-tiny-sdf": "^0.0.4",
+    "l7hammerjs": "^0.0.7",
+    "lodash": "^4.17.15",
+    "reflect-metadata": "^0.1.13",
+    "viewport-mercator-project": "^6.2.1"
+  },
+  "devDependencies": {
+    "@types/element-resize-event": "^2.0.0",
+    "@types/gl-matrix": "^2.4.5",
+    "@types/hammerjs": "^2.0.36",
+    "@types/lodash": "^4.14.138",
+    "@types/viewport-mercator-project": "^6.1.0",
+    "rollup-plugin-string": "^3.0.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.19",
+    "vitest": "^2.1.8"
+  },
+  "gitHead": "684ba4eb806a798713496d3fc0b4d1e17517dc31",
+  "publishConfig": {
+    "access": "public"
+  }
+}

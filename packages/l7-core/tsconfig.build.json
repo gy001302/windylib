@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.build.json",
+  "compilerOptions": {
+    "declarationDir": "./es",
+    "rootDir": "./src",
+    "baseUrl": "./",
+    "paths": {
+      "*": ["node_modules", "typings/*"],
+      "@windylib/until": ["../until/dist/index.d.ts"]
+    }
+  },
+  "include": ["./src"],
+  "exclude": ["./src/**/__tests__/**", "./__tests__/**"]
+}

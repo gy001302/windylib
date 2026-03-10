@@ -1,0 +1,31 @@
+{
+  "name": "windylib",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "pnpm run build:app && pnpm run build:maps && pnpm run build:core && pnpm run build:until && pnpm run build:l7-core",
+    "build:app": "vite build",
+    "build:maps": "pnpm --filter @windylib/maps run build",
+    "build:core": "pnpm --filter @windylib/core run build",
+    "build:until": "pnpm --filter @windylib/until run build",
+    "build:l7-core": "pnpm --filter @antv/l7-core run build",
+    "lint": "eslint .storybook src packages/core/src packages/maps/src packages/storybook/src vite.config.js packages/core/vite.config.js packages/maps/vite.config.js --ext .js,.jsx",
+    "lint:fix": "eslint .storybook src packages/core/src packages/maps/src packages/storybook/src vite.config.js packages/core/vite.config.js packages/maps/vite.config.js --ext .js,.jsx --fix",
+    "preview": "vite preview",
+    "storybook": "pnpm --dir packages/storybook run dev",
+    "build-storybook": "pnpm --dir packages/storybook run build",
+    "browser:logs": "pnpm --dir packages/storybook run browser:monitor"
+  },
+  "devDependencies": {
+    "eslint": "8.57.1",
+    "eslint-config-airbnb": "19.0.4",
+    "eslint-plugin-import": "2.29.1",
+    "eslint-plugin-jsx-a11y": "6.8.0",
+    "eslint-plugin-react": "7.37.5",
+    "eslint-plugin-react-hooks": "4.6.2",
+    "globals": "15.15.0",
+    "vite": "^5.4.19"
+  }
+}

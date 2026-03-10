@@ -1,0 +1,69 @@
+import { useEffect, useRef } from 'react'
+import { TriangleMultiPassLayer } from '@windylib/core'
+import { MapLibreLayerHost, toColorArray } from '@windylib/maps'
+
+export function MapLibreTriangleMap(props) {
+  const hostRef = useRef(null)
+  const mapHostRef = useRef(null)
+
+  useEffect(() => {
+    if (!hostRef.current) {
+      return undefined
+    }
+
+    const mapHost = new MapLibreLayerHost({
+      container: hostRef.current,
+      initialProps: {
+        vertices: props.vertices,
+        zoom: props.zoom,
+        color: toColorArray(props.color, props.alpha),
+        invertEnabled: props.invertEnabled,
+        vertexShader: props.vertexShader,
+        fragmentShader: props.fragmentShader,
+      },
+      createLayer: (layerProps) => new TriangleMultiPassLayer({
+        id: 'triangle-multipass-map-only',
+        vertices: layerProps.vertices,
+        color: layerProps.color,
+        invertEnabled: layerProps.invertEnabled,
+        vertexShader: layerProps.vertexShader,
+        fragmentShader: layerProps.fragmentShader,
+      }),
+    })
+    mapHost.attach()
+    mapHostRef.current = mapHost
+
+    return () => {
+      mapHost.detach()
+    }
+  }, [])
+
+  useEffect(() => {
+    mapHostRef.current?.setProps({
+      vertices: props.vertices,
+      zoom: props.zoom,
+      color: toColorArray(props.color, props.alpha),
+      invertEnabled: props.invertEnabled,
+      vertexShader: props.vertexShader,
+      fragmentShader: props.fragmentShader,
+    })
+  }, [
+    props.alpha,
+    props.color,
+    props.fragmentShader,
+    props.invertEnabled,
+    props.vertexShader,
+    props.vertices,
+    props.zoom,
+  ])
+
+  return (
+    <div
+      ref={hostRef}
+      style={{
+        width: '100%',
+        height: '100vh',
+      }}
+    />
+  )
+}
