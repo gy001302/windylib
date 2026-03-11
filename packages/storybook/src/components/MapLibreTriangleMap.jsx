@@ -1,10 +1,15 @@
 import { useEffect, useRef } from 'react'
-import { TriangleMultiPassLayer } from '@windylib/core'
-import { MapLibreLayerHost, toColorArray } from '@windylib/maps'
+import { TriangleMultiPassLayer } from '@windylib/layers'
+import {
+  createMapLibreMercatorProjector,
+  MapLibreLayerHost,
+  toColorArray,
+} from '@windylib/maps-maplibre'
 
 export function MapLibreTriangleMap(props) {
   const hostRef = useRef(null)
   const mapHostRef = useRef(null)
+  const projectorRef = useRef(createMapLibreMercatorProjector())
 
   useEffect(() => {
     if (!hostRef.current) {
@@ -25,6 +30,7 @@ export function MapLibreTriangleMap(props) {
         id: 'triangle-multipass-map-only',
         vertices: layerProps.vertices,
         color: layerProps.color,
+        projectPosition: projectorRef.current,
         invertEnabled: layerProps.invertEnabled,
         vertexShader: layerProps.vertexShader,
         fragmentShader: layerProps.fragmentShader,

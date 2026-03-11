@@ -18,12 +18,14 @@ const meta = {
     zoom: 5,
     color: '#ff6f3c',
     alpha: 0.86,
+    invertEnabled: false,
   },
   argTypes: {
     vertices: { control: 'object' },
     zoom: { control: { type: 'range', min: 1, max: 12, step: 0.1 } },
     color: { control: 'color' },
     alpha: { control: { type: 'range', min: 0, max: 1, step: 0.01 } },
+    invertEnabled: { control: 'boolean' },
   },
 }
 
@@ -36,6 +38,7 @@ export const Default = {
       zoom={args.zoom}
       color={args.color}
       alpha={args.alpha}
+      invertEnabled={args.invertEnabled}
     />
   ),
 }

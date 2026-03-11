@@ -29,6 +29,9 @@ importers:
       globals:
         specifier: 15.15.0
         version: 15.15.0
+      rollup-plugin-string:
+        specifier: ^3.0.0
+        version: 3.0.0
       vite:
         specifier: ^5.4.19
         version: 5.4.19(@types/node@25.3.5)(less@3.9.0)(lightningcss@1.31.1)(terser@5.46.0)
@@ -140,7 +143,7 @@ importers:
         specifier: ^2.1.8
         version: 2.1.9(@types/node@25.3.5)(less@3.9.0)(lightningcss@1.31.1)(terser@5.46.0)
 
-  packages/maps:
+  packages/layers:
     devDependencies:
       '@luma.gl/core':
         specifier: ^9.2.6
@@ -148,24 +151,33 @@ importers:
       '@luma.gl/engine':
         specifier: ^9.2.6
         version: 9.2.6(@luma.gl/core@9.2.6)(@luma.gl/shadertools@9.2.6(@luma.gl/core@9.2.6))
-      '@luma.gl/webgl':
-        specifier: ^9.2.6
-        version: 9.2.6(@luma.gl/core@9.2.6)
-      deck.gl:
-        specifier: ^9.2.11
-        version: 9.2.11(@arcgis/core@4.34.8)(@luma.gl/constants@9.2.6)(@luma.gl/gltf@9.2.6(@luma.gl/constants@9.2.6)(@luma.gl/core@9.2.6)(@luma.gl/engine@9.2.6(@luma.gl/core@9.2.6)(@luma.gl/shadertools@9.2.6(@luma.gl/core@9.2.6)))(@luma.gl/shadertools@9.2.6(@luma.gl/core@9.2.6)))(@luma.gl/shadertools@9.2.6(@luma.gl/core@9.2.6))(@luma.gl/webgl@9.2.6(@luma.gl/core@9.2.6))(@math.gl/web-mercator@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@windylib/core':
+        specifier: workspace:*
+        version: link:../core
+      vite:
+        specifier: ^5.4.19
+        version: 5.4.19(@types/node@25.3.5)(less@3.9.0)(lightningcss@1.31.1)(terser@5.46.0)
+
+  packages/maps/leaflet:
+    devDependencies:
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4
+      vite:
+        specifier: ^5.4.19
+        version: 5.4.19(@types/node@25.3.5)(less@3.9.0)(lightningcss@1.31.1)(terser@5.46.0)
+
+  packages/maps/maplibre:
+    devDependencies:
       maplibre-gl:
         specifier: ^5.19.0
         version: 5.19.0
+      vite:
+        specifier: ^5.4.19
+        version: 5.4.19(@types/node@25.3.5)(less@3.9.0)(lightningcss@1.31.1)(terser@5.46.0)
 
   packages/storybook:
     dependencies:
-      '@deck.gl/mapbox':
-        specifier: ^9.2.11
-        version: 9.2.11(@deck.gl/core@9.2.11)(@luma.gl/constants@9.2.6)(@luma.gl/core@9.2.6)(@math.gl/web-mercator@4.1.0)
       '@luma.gl/core':
         specifier: ^9.2.6
         version: 9.2.6
@@ -178,12 +190,15 @@ importers:
       '@windylib/core':
         specifier: workspace:*
         version: link:../core
-      '@windylib/maps':
+      '@windylib/layers':
         specifier: workspace:*
-        version: link:../maps
-      deck.gl:
-        specifier: ^9.2.11
-        version: 9.2.11(@arcgis/core@4.34.8)(@luma.gl/constants@9.2.6)(@luma.gl/gltf@9.2.6(@luma.gl/constants@9.2.6)(@luma.gl/core@9.2.6)(@luma.gl/engine@9.2.6(@luma.gl/core@9.2.6)(@luma.gl/shadertools@9.2.6(@luma.gl/core@9.2.6)))(@luma.gl/shadertools@9.2.6(@luma.gl/core@9.2.6)))(@luma.gl/shadertools@9.2.6(@luma.gl/core@9.2.6))(@luma.gl/webgl@9.2.6(@luma.gl/core@9.2.6))(@math.gl/web-mercator@4.1.0)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+        version: link:../layers
+      '@windylib/maps-leaflet':
+        specifier: workspace:*
+        version: link:../maps/leaflet
+      '@windylib/maps-maplibre':
+        specifier: workspace:*
+        version: link:../maps/maplibre
       leaflet:
         specifier: ^1.9.4
         version: 1.9.4

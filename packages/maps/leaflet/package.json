@@ -1,0 +1,21 @@
+{
+  "name": "@windylib/maps-leaflet",
+  "version": "0.0.0",
+  "type": "module",
+  "module": "./dist/index.js",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "vite build"
+  },
+  "peerDependencies": {
+    "leaflet": "^1.9.4"
+  },
+  "devDependencies": {
+    "leaflet": "^1.9.4",
+    "vite": "^5.4.19"
+  }
+}

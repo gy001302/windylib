@@ -1,10 +1,15 @@
 import { useEffect, useRef } from 'react'
-import { MapTriangleLayer } from '@windylib/core'
-import { MapLibreLayerHost, toColorArray } from '@windylib/maps'
+import { MapTriangleLayer } from '@windylib/layers'
+import {
+  createMapLibreMercatorProjector,
+  MapLibreLayerHost,
+  toColorArray,
+} from '@windylib/maps-maplibre'
 
 export function MapTriangleLayerMap(props) {
   const hostRef = useRef(null)
   const mapHostRef = useRef(null)
+  const projectorRef = useRef(createMapLibreMercatorProjector())
 
   useEffect(() => {
     if (!hostRef.current) {
@@ -22,6 +27,7 @@ export function MapTriangleLayerMap(props) {
         id: 'map-triangle-layer',
         vertices: layerProps.vertices,
         color: layerProps.color,
+        projectPosition: projectorRef.current,
       }),
     })
     mapHost.attach()

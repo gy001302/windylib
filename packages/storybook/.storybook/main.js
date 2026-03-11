@@ -6,7 +6,9 @@ const configDir = dirname(fileURLToPath(import.meta.url))
 const packageDir = resolve(configDir, '..')
 const childProcessShimPath = resolve(packageDir, 'src/shims/childProcessShim.js')
 const coreEntryPath = resolve(packageDir, '../core/src/index.js')
-const mapsEntryPath = resolve(packageDir, '../maps/src/index.js')
+const layersEntryPath = resolve(packageDir, '../layers/src/index.js')
+const mapsLeafletEntryPath = resolve(packageDir, '../maps/leaflet/src/index.js')
+const mapsMapLibreEntryPath = resolve(packageDir, '../maps/maplibre/src/index.js')
 
 export default {
   stories: ['../src/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
@@ -28,7 +30,13 @@ export default {
       plugins: [...(config.plugins ?? []), react()],
       optimizeDeps: {
         ...(config.optimizeDeps ?? {}),
-        exclude: [...(config.optimizeDeps?.exclude ?? []), '@windylib/core', '@windylib/maps'],
+        exclude: [
+          ...(config.optimizeDeps?.exclude ?? []),
+          '@windylib/core',
+          '@windylib/layers',
+          '@windylib/maps-leaflet',
+          '@windylib/maps-maplibre',
+        ],
       },
       resolve: {
         ...(config.resolve ?? {}),
@@ -36,7 +44,9 @@ export default {
           ...(Array.isArray(config.resolve?.alias) ? config.resolve.alias : []),
           { find: 'child_process', replacement: childProcessShimPath },
           { find: /^@windylib\/core$/, replacement: coreEntryPath },
-          { find: /^@windylib\/maps$/, replacement: mapsEntryPath },
+          { find: /^@windylib\/layers$/, replacement: layersEntryPath },
+          { find: /^@windylib\/maps-leaflet$/, replacement: mapsLeafletEntryPath },
+          { find: /^@windylib\/maps-maplibre$/, replacement: mapsMapLibreEntryPath },
         ],
       },
     }

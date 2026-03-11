@@ -2,7 +2,8 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 // eslint-disable-next-line import/no-unresolved
-import { LeafletCanvasHost, LeafletMapAdapter, LeafletTriangleRenderer } from '@windylib/maps'
+import { CanvasOverlayRendererHost, ProjectedTriangleRenderer } from '@windylib/core'
+import { LeafletCanvasHost, LeafletMapAdapter } from '@windylib/maps-leaflet'
 
 function getMapCenter(vertices) {
   if (!Array.isArray(vertices) || !vertices.length) {
@@ -35,6 +36,7 @@ export function LeafletTriangleMap(props) {
   const hostRef = useRef(null)
   const mapRef = useRef(null)
   const canvasHostRef = useRef(null)
+  const rendererHostRef = useRef(null)
   const rendererRef = useRef(null)
 
   useEffect(() => {
@@ -54,29 +56,34 @@ export function LeafletTriangleMap(props) {
       maxZoom: 19,
     }).addTo(map)
 
-    const renderer = new LeafletTriangleRenderer({
+    const renderer = new ProjectedTriangleRenderer({
       id: 'leaflet-triangle-renderer',
       vertices: props.vertices,
       color: toColorArray(props.color, props.alpha),
+      invertEnabled: props.invertEnabled,
       subdivisionSteps: 24,
     })
 
     const canvasHost = new LeafletCanvasHost({
       map,
       mapAdapter: new LeafletMapAdapter(map),
+    })
+    const rendererHost = new CanvasOverlayRendererHost({
+      canvasHost,
       renderer,
     })
 
     mapRef.current = map
     rendererRef.current = renderer
     canvasHostRef.current = canvasHost
+    rendererHostRef.current = rendererHost
 
     let disposed = false
 
     const attachHost = async () => {
-      await canvasHost.attach()
+      await rendererHost.attach()
       if (disposed) {
-        canvasHost.detach()
+        rendererHost.detach()
       }
     }
 
@@ -84,7 +91,7 @@ export function LeafletTriangleMap(props) {
 
     return () => {
       disposed = true
-      canvasHost.detach()
+      rendererHost.detach()
       map.remove()
     }
   }, [])
@@ -93,10 +100,11 @@ export function LeafletTriangleMap(props) {
     rendererRef.current?.setProps({
       vertices: props.vertices,
       color: toColorArray(props.color, props.alpha),
+      invertEnabled: props.invertEnabled,
       subdivisionSteps: 24,
     })
-    canvasHostRef.current?.invalidate()
-  }, [props.alpha, props.color, props.vertices])
+    rendererHostRef.current?.invalidate()
+  }, [props.alpha, props.color, props.invertEnabled, props.vertices])
 
   useEffect(() => {
     if (!mapRef.current) {
@@ -106,7 +114,7 @@ export function LeafletTriangleMap(props) {
     mapRef.current.setView(getMapCenter(props.vertices), props.zoom, {
       animate: false,
     })
-    canvasHostRef.current?.invalidate()
+    rendererHostRef.current?.invalidate()
   }, [props.vertices, props.zoom])
 
   return (

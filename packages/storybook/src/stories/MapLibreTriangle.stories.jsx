@@ -1,6 +1,6 @@
 import { MapLibreTriangleMap } from '../components/MapLibreTriangleMap'
 // eslint-disable-next-line import/no-unresolved
-import { TriangleMultiPassLayer } from '@windylib/core'
+import { TriangleMultiPassLayer } from '@windylib/layers'
 
 const cityTriangleVertices = [
   [116.38, 39.9, 1],

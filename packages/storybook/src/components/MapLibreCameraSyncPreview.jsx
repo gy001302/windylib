@@ -1,6 +1,6 @@
 import { useEffect, useState, useRef } from 'react'
 import { SimpleCameraService } from '@windylib/core'
-import { MapLibreCameraSync, MapLibreLayerHost } from '@windylib/maps'
+import { MapLibreCameraSync, MapLibreLayerHost } from '@windylib/maps-maplibre'
 
 function formatJson(value) {
   return JSON.stringify(value, null, 2)
