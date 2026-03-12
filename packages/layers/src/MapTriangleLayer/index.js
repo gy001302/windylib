@@ -47,20 +47,20 @@ export class MapTriangleLayer extends BaseLayer {
     this._refreshMesh()
   }
 
-  updateState({ props, oldProps = {}, nextProps = {} }) {
-    const changeFlags = this.diffProps(oldProps, props, nextProps)
-
-    super.updateState({
-      props,
-      oldProps,
-      nextProps,
-      changeFlags,
-    })
-
-    const geometryChanged = changeFlags.dataChanged
+  onPropsChange({ props, oldProps, nextProps }) {
+    const geometryChanged = (
+      nextProps.vertices !== undefined
+      || nextProps.subdivisionSteps !== undefined
+    ) && (
+      props.vertices !== oldProps.vertices
+      || props.subdivisionSteps !== oldProps.subdivisionSteps
+    )
     const shaderChanged = (
-      changeFlags.changedProps.includes('vertexShader')
-      || changeFlags.changedProps.includes('fragmentShader')
+      nextProps.vertexShader !== undefined
+      || nextProps.fragmentShader !== undefined
+    ) && (
+      props.vertexShader !== oldProps.vertexShader
+      || props.fragmentShader !== oldProps.fragmentShader
     )
 
     if (geometryChanged) {
@@ -81,24 +81,21 @@ export class MapTriangleLayer extends BaseLayer {
     })
   }
 
-  initializeState() {
-    super.initializeState({ device: this.device })
-    this._syncGeometry()
-    this._onDeviceReady()
-  }
-
-  draw({ gl, shaderData, defaultProjectionData }) {
-    super.draw({ gl, shaderData, defaultProjectionData })
-
-    if (!this.device || !shaderData || !defaultProjectionData) {
+  render(gl, args) {
+    if (!this.device || !args?.shaderData || !args?.defaultProjectionData) {
       return
     }
 
     this.renderLayer(gl, {
-      shaderDescription: shaderData,
-      projectionData: defaultProjectionData,
+      shaderDescription: args.shaderData,
+      projectionData: args.defaultProjectionData,
       size: this.getRenderSize(gl),
     })
+  }
+
+  onDeviceReady() {
+    this._syncGeometry()
+    this._onDeviceReady()
   }
 
   onDeviceError(error) {
@@ -109,13 +106,7 @@ export class MapTriangleLayer extends BaseLayer {
     })
   }
 
-  finalizeState() {
-    super.finalizeState({
-      device: this.device,
-      map: this.map,
-      gl: this.gl,
-      props: this.props,
-    })
+  onBeforeRemove() {
     this._onBeforeRemove()
     this._destroyModels()
     this.positionsBuffer?.destroy()

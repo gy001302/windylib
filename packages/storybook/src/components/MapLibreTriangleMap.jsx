@@ -25,9 +25,6 @@ export function MapLibreTriangleMap(props) {
         invertEnabled: props.invertEnabled,
         vertexShader: props.vertexShader,
         fragmentShader: props.fragmentShader,
-        onShaderStateChange: props.onShaderStateChange,
-        onPassStateChange: props.onPassStateChange,
-        onLifecycleStateChange: props.onLifecycleStateChange,
       },
       createLayer: (layerProps) => new TriangleMultiPassLayer({
         id: 'triangle-multipass-map-only',
@@ -37,9 +34,6 @@ export function MapLibreTriangleMap(props) {
         invertEnabled: layerProps.invertEnabled,
         vertexShader: layerProps.vertexShader,
         fragmentShader: layerProps.fragmentShader,
-        onShaderStateChange: layerProps.onShaderStateChange,
-        onPassStateChange: layerProps.onPassStateChange,
-        onLifecycleStateChange: layerProps.onLifecycleStateChange,
       }),
     })
     mapHost.attach()
@@ -58,18 +52,12 @@ export function MapLibreTriangleMap(props) {
       invertEnabled: props.invertEnabled,
       vertexShader: props.vertexShader,
       fragmentShader: props.fragmentShader,
-      onShaderStateChange: props.onShaderStateChange,
-      onPassStateChange: props.onPassStateChange,
-      onLifecycleStateChange: props.onLifecycleStateChange,
     })
   }, [
     props.alpha,
     props.color,
     props.fragmentShader,
     props.invertEnabled,
-    props.onLifecycleStateChange,
-    props.onPassStateChange,
-    props.onShaderStateChange,
     props.vertexShader,
     props.vertices,
     props.zoom,

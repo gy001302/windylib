@@ -4,6 +4,8 @@ import { MapTriangleLayer } from '../MapTriangleLayer'
 import {
   BasePass,
   BasePostProcessingPass,
+  MultiPassRenderer,
+  ResourceManager,
 } from '@windylib/core'
 
 const INVERT_FRAGMENT_SHADER = `#version 300 es
@@ -182,24 +184,33 @@ export class TriangleMultiPassLayer extends MapTriangleLayer {
 
   constructor(props = {}) {
     super(props)
-    this.renderPasses = []
-    this.postProcessingPasses = []
-    this.framebuffers = new Map()
-    this.textures = new Map()
+    this.resourceManager = null
+    this.multiPassRenderer = null
   }
 
   _onDeviceReady() {
+    this.resourceManager = new ResourceManager(this.device)
+    this.multiPassRenderer = new MultiPassRenderer({
+      device: this.device,
+      resources: this.resourceManager,
+    })
     this.configurePasses()
   }
 
   onLayerPropsChange({ props, oldProps, shaderChanged }) {
-    if (!this.device) {
+    if (!this.multiPassRenderer) {
       return
     }
 
     if (props.invertEnabled !== oldProps.invertEnabled || shaderChanged) {
       this.configurePasses()
     }
+
+    this.multiPassRenderer.updatePasses(this, {
+      props,
+      oldProps,
+      changeFlags: {},
+    })
   }
 
   createPasses() {
@@ -216,127 +227,24 @@ export class TriangleMultiPassLayer extends MapTriangleLayer {
   }
 
   configurePasses() {
-    this._destroyPasses()
-
-    const runtime = this._getPassRuntime()
-    this.renderPasses = this.createPasses()
-    this.postProcessingPasses = this.createPostProcessingPasses()
-
-    this.renderPasses.forEach((pass) => pass.init?.(runtime))
-    this.postProcessingPasses.forEach((pass) => pass.init?.(runtime))
+    this.multiPassRenderer?.setPasses([
+      ...this.createPasses(),
+      ...this.createPostProcessingPasses(),
+    ], this)
   }
 
   renderLayer(gl, renderContext) {
-    if (!this.device) {
+    if (!this.multiPassRenderer) {
       return
     }
 
-    const runtime = {
-      ...this._getPassRuntime(),
-      ...renderContext,
-    }
-
-    let input = null
-    this.renderPasses.forEach((pass) => {
-      input = pass.render({
-        ...runtime,
-        input,
-      })
-    })
-
-    const enabledPostProcessingPasses = this.postProcessingPasses.filter(
-      (pass) => pass.isEnabled?.() ?? true,
-    )
-
-    enabledPostProcessingPasses.forEach((pass, index) => {
-      pass.setRenderToScreen?.(index === enabledPostProcessingPasses.length - 1)
-      input = pass.render({
-        ...runtime,
-        input,
-      })
-    })
+    this.multiPassRenderer.render(this, renderContext)
   }
 
   _onBeforeRemove() {
-    this._destroyPasses()
-    this._destroyResources()
-  }
-
-  getTexture(id, props) {
-    const existing = this.textures.get(id)
-
-    if (existing && props) {
-      const widthChanged = Number.isFinite(props.width) && existing.width !== props.width
-      const heightChanged = Number.isFinite(props.height) && existing.height !== props.height
-      const formatChanged = props.format && existing.format !== props.format
-
-      if (widthChanged || heightChanged || formatChanged) {
-        existing.destroy()
-        this.textures.delete(id)
-      }
-    }
-
-    if (!this.textures.has(id)) {
-      this.textures.set(id, this.device.createTexture({ id, ...props }))
-    }
-
-    return this.textures.get(id)
-  }
-
-  getFramebuffer(id, props) {
-    const existing = this.framebuffers.get(id)
-    const nextColorAttachments = props?.colorAttachments || []
-
-    if (existing) {
-      const needsRecreate = nextColorAttachments.some((attachment, index) => {
-        const current = existing.colorAttachments[index]?.texture
-        return current && attachment && current !== attachment
-      })
-
-      if (needsRecreate) {
-        existing.destroy()
-        this.framebuffers.delete(id)
-      }
-    }
-
-    if (!this.framebuffers.has(id)) {
-      this.framebuffers.set(id, this.device.createFramebuffer({ id, ...props }))
-    }
-
-    return this.framebuffers.get(id)
-  }
-
-  resizeFramebuffer(id, size) {
-    const framebuffer = this.framebuffers.get(id)
-    if (!framebuffer) {
-      return
-    }
-
-    if (framebuffer.width !== size.width || framebuffer.height !== size.height) {
-      framebuffer.resize(size)
-    }
-  }
-
-  _getPassRuntime() {
-    return {
-      layer: this,
-      device: this.device,
-      resources: this,
-    }
-  }
-
-  _destroyPasses() {
-    const runtime = this._getPassRuntime()
-    this.renderPasses.forEach((pass) => pass.destroy?.(runtime))
-    this.postProcessingPasses.forEach((pass) => pass.destroy?.(runtime))
-    this.renderPasses = []
-    this.postProcessingPasses = []
-  }
-
-  _destroyResources() {
-    this.framebuffers.forEach((framebuffer) => framebuffer.destroy())
-    this.framebuffers.clear()
-    this.textures.forEach((texture) => texture.destroy())
-    this.textures.clear()
+    this.multiPassRenderer?.destroy(this)
+    this.multiPassRenderer = null
+    this.resourceManager?.destroy()
+    this.resourceManager = null
   }
 }
