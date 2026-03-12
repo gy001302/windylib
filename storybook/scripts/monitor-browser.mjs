@@ -58,7 +58,8 @@ async function waitForStorybook(url) {
 }
 
 async function main() {
-  const runtimeDir = path.resolve(process.cwd(), '.runtime')
+  const storybookDir = path.resolve(path.dirname(new URL(import.meta.url).pathname), '..')
+  const runtimeDir = path.resolve(storybookDir, '.runtime')
   fs.mkdirSync(runtimeDir, { recursive: true })
 
   const logFile = path.resolve(runtimeDir, 'browser-monitor.log')

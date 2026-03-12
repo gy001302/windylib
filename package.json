@@ -9,14 +9,36 @@
     "build:maps:maplibre": "pnpm --filter @windylib/maps-maplibre run build",
     "build:core": "pnpm --filter @windylib/core run build",
     "build:layers": "pnpm --filter @windylib/layers run build",
-    "build:storybook": "pnpm --dir packages/storybook run build",
-    "lint": "eslint packages/storybook/.storybook packages/core/src packages/layers/src packages/maps/leaflet/src packages/maps/maplibre/src packages/storybook/src packages/core/vite.config.js packages/maps/leaflet/vite.config.js packages/maps/maplibre/vite.config.js packages/layers/vite.config.js --ext .js,.jsx",
-    "lint:fix": "eslint packages/storybook/.storybook packages/core/src packages/layers/src packages/maps/leaflet/src packages/maps/maplibre/src packages/storybook/src packages/core/vite.config.js packages/maps/leaflet/vite.config.js packages/maps/maplibre/vite.config.js packages/layers/vite.config.js --ext .js,.jsx --fix",
-    "storybook": "pnpm --dir packages/storybook run dev",
-    "build-storybook": "pnpm run build:storybook",
-    "browser:logs": "pnpm --dir packages/storybook run browser:monitor"
+    "storybook": "mkdir -p storybook/.storybook-home && HOME=$PWD/storybook/.storybook-home XDG_CONFIG_HOME=$PWD/storybook/.storybook-home STORYBOOK_DISABLE_TELEMETRY=1 storybook dev -c storybook/.storybook --port 6006 --exact-port",
+    "build:storybook": "mkdir -p storybook/.storybook-home && HOME=$PWD/storybook/.storybook-home XDG_CONFIG_HOME=$PWD/storybook/.storybook-home STORYBOOK_DISABLE_TELEMETRY=1 storybook build -c storybook/.storybook -o storybook/storybook-static",
+    "browser:logs": "node storybook/scripts/monitor-browser.mjs",
+    "docs:dev": "vitepress dev docs",
+    "docs:build": "vitepress build docs",
+    "docs:preview": "vitepress preview docs",
+    "lint": "eslint storybook/.storybook storybook/src packages/core/src packages/layers/src packages/maps/leaflet/src packages/maps/maplibre/src packages/core/vite.config.js packages/maps/leaflet/vite.config.js packages/maps/maplibre/vite.config.js packages/layers/vite.config.js --ext .js,.jsx,.mjs",
+    "lint:fix": "eslint storybook/.storybook storybook/src packages/core/src packages/layers/src packages/maps/leaflet/src packages/maps/maplibre/src packages/core/vite.config.js packages/maps/leaflet/vite.config.js packages/maps/maplibre/vite.config.js packages/layers/vite.config.js --ext .js,.jsx,.mjs --fix",
+    "build-storybook": "pnpm run build:storybook"
+  },
+  "dependencies": {
+    "@luma.gl/core": "^9.2.6",
+    "@luma.gl/engine": "^9.2.6",
+    "@luma.gl/webgl": "^9.2.6",
+    "@windylib/core": "workspace:*",
+    "@windylib/layers": "workspace:*",
+    "@windylib/maps-leaflet": "workspace:*",
+    "@windylib/maps-maplibre": "workspace:*",
+    "leaflet": "^1.9.4",
+    "maplibre-gl": "^5.19.0",
+    "playwright": "^1.53.2",
+    "react": "^19.2.4",
+    "react-dom": "^19.2.4"
   },
   "devDependencies": {
+    "@storybook/addon-essentials": "8.6.14",
+    "@storybook/addon-links": "^8.6.14",
+    "@storybook/react": "8.6.14",
+    "@storybook/react-vite": "^8.6.14",
+    "@vitejs/plugin-react": "^5.1.4",
     "eslint": "8.57.1",
     "eslint-config-airbnb": "19.0.4",
     "eslint-plugin-import": "2.29.1",
@@ -25,6 +47,8 @@
     "eslint-plugin-react-hooks": "4.6.2",
     "globals": "15.15.0",
     "rollup-plugin-string": "^3.0.0",
-    "vite": "^5.4.19"
+    "storybook": "^8.6.14",
+    "vite": "^5.4.19",
+    "vitepress": "^1.6.4"
   }
 }

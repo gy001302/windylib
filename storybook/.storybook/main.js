@@ -3,12 +3,13 @@ import { fileURLToPath } from 'node:url'
 import react from '@vitejs/plugin-react'
 
 const configDir = dirname(fileURLToPath(import.meta.url))
-const packageDir = resolve(configDir, '..')
-const childProcessShimPath = resolve(packageDir, 'src/shims/childProcessShim.js')
-const coreEntryPath = resolve(packageDir, '../core/src/index.js')
-const layersEntryPath = resolve(packageDir, '../layers/src/index.js')
-const mapsLeafletEntryPath = resolve(packageDir, '../maps/leaflet/src/index.js')
-const mapsMapLibreEntryPath = resolve(packageDir, '../maps/maplibre/src/index.js')
+const storybookDir = resolve(configDir, '..')
+const rootDir = resolve(storybookDir, '..')
+const childProcessShimPath = resolve(storybookDir, 'src/shims/childProcessShim.js')
+const coreEntryPath = resolve(rootDir, 'packages/core/src/index.js')
+const layersEntryPath = resolve(rootDir, 'packages/layers/src/index.js')
+const mapsLeafletEntryPath = resolve(rootDir, 'packages/maps/leaflet/src/index.js')
+const mapsMapLibreEntryPath = resolve(rootDir, 'packages/maps/maplibre/src/index.js')
 
 export default {
   stories: ['../src/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)'],

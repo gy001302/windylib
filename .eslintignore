@@ -2,6 +2,5 @@ node_modules/
 packages/*/node_modules/
 packages/*/storybook-static/
 packages/*/dist/
-storybook-static/
-.storybook-home/
+storybook/storybook-static/
 packages/*/.storybook-home/
