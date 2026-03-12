@@ -1,0 +1,28 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "checkJs": false,
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "target": "ES2020",
+    "paths": {
+      "@windylib/core": [
+        "packages/core/src/index.js"
+      ],
+      "@windylib/layers": [
+        "packages/layers/src/index.js"
+      ],
+      "@windylib/maps-leaflet": [
+        "packages/maps/leaflet/src/index.js"
+      ],
+      "@windylib/maps-maplibre": [
+        "packages/maps/maplibre/src/index.js"
+      ]
+    }
+  },
+  "exclude": [
+    "node_modules",
+    "storybook/storybook-static",
+    "docs/.vitepress/dist"
+  ]
+}

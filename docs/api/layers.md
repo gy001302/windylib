@@ -2,15 +2,14 @@
 
 对应 `packages/layers/src/index.js` 中的公开导出。
 
-这是最接近业务使用层的一组 API。
+这是图层实现层，不是最高层的用户接入 API。
 
-如果你的目标是：
+如果你的目标只是“把三角形图层挂到地图上”，更推荐优先看：
 
-- 在地图上叠加一个三角形区域
-- 调整颜色或 shader
-- 启用基础后处理
+- `@windylib/maps-maplibre` 的 `MapLibreTriangleHost`
+- `@windylib/maps-leaflet` 的宿主接入说明
 
-通常从这个包开始就够了。
+当你需要更底层的控制能力时，再回到这个包。
 
 ## `TriangleLayer`
 
@@ -25,7 +24,7 @@
 - 共享地图上下文里的直接渲染
 - canvas overlay 模式下的投影渲染
 
-典型用法：
+底层实例化示例：
 
 ```js
 import { TriangleLayer } from '@windylib/layers'
@@ -41,6 +40,8 @@ const layer = new TriangleLayer({
   subdivisionSteps: 24,
 })
 ```
+
+这段代码只表示“图层对象如何创建”，不是一个可直接运行的完整接入示例。
 
 关键点：
 
@@ -63,7 +64,7 @@ const layer = new TriangleLayer({
 - 需要观察 pass 生命周期
 - 需要为后续更多效果做实验
 
-最小示例：
+底层实例化示例：
 
 ```js
 import { TriangleMultiPassLayer } from '@windylib/layers'
@@ -76,3 +77,5 @@ const layer = new TriangleMultiPassLayer({
   invertEnabled: true,
 })
 ```
+
+同样地，这段代码表示的是图层对象本身，不是完整的地图接入示例。

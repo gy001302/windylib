@@ -4,6 +4,43 @@
 
 这个包负责 MapLibre 侧的宿主、相机同步和投影工具。
 
+## `MapLibreTriangleHost`
+
+推荐优先使用的高阶 API。
+
+它适合直接给业务接入用，目标是让用户不必手动拼这些内部件：
+
+- `MapLibreLayerHost`
+- `TriangleMultiPassLayer`
+- `createMapLibreMercatorProjector()`
+- `toColorArray()`
+
+最小示例：
+
+```js
+import { MapLibreTriangleHost } from '@windylib/maps-maplibre'
+
+const host = new MapLibreTriangleHost({
+  container,
+  id: 'triangle-layer',
+  vertices: [
+    [116.38, 39.9, 1],
+    [121.47, 31.23, 1],
+    [113.26, 23.13, 1],
+  ],
+  zoom: 4.2,
+  color: '#ff6f3c',
+  alpha: 0.86,
+  invertEnabled: true,
+})
+
+host.attach()
+```
+
+## `createMapLibreTriangleHost(options)`
+
+`MapLibreTriangleHost` 的工厂函数版本。
+
 ## `MapLibreLayerHost`
 
 创建 MapLibre 地图实例，并把可渲染图层挂进去。
@@ -15,6 +52,8 @@
 - 在 `load` 后把 layer 加到地图里
 - 在 props 变化时同步中心点、缩放和图层 props
 
+这个类更适合高级扩展，不适合作为普通用户的首选入口。
+
 ## `MapLibreCameraSync`
 
 把 MapLibre 相机状态同步到共享相机服务。
@@ -25,30 +64,13 @@
 - 需要做地图和自定义 3D 相机联动
 - 需要在调试界面里观察相机状态
 
-## `createMapLibreCameraState(map, options)`
-
-根据 MapLibre 地图实例构建标准化的相机状态快照。
-
-返回值里包括：
-
-- 地图中心点
-- zoom / pitch / bearing
-- viewport
-- camera 的 `position / target / up`
-
 ## `createMapLibreMercatorProjector()`
 
 返回一个将经纬度投影到 Mercator 坐标的辅助函数。
 
-它通常会直接传给 `TriangleLayer` 或 `TriangleMultiPassLayer` 的 `projectPosition`。
+它通常会直接传给底层 `TriangleLayer` 或 `TriangleMultiPassLayer` 的 `projectPosition`。
 
-## `getMapCenter(vertices)`
-
-根据三角形顶点计算中心点。
-
-## `projectLngLatToMercator(position)`
-
-把单个地理坐标点投影到 Mercator 坐标。
+如果你直接使用 `MapLibreTriangleHost`，通常不需要自己处理它。
 
 ## `toColorArray(hex, alpha)`
 

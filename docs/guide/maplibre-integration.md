@@ -1,49 +1,50 @@
 # MapLibre 接入
 
-MapLibre 目前通过 custom layer 风格的宿主接入 `TriangleLayer` 与 `TriangleMultiPassLayer`。
+MapLibre 当前推荐通过高阶宿主 `MapLibreTriangleHost` 接入。
+
+这页文档优先对应当前 Storybook 示例：
+
+- `Maps/DeckGL Triangle MultiPass`
+- `Foundations/Triangle Lifecycle`
 
 这条链路更贴近地图本身的渲染生命周期。
 
 ## 关键对象
 
+- `MapLibreTriangleHost`
 - `MapLibreLayerHost`
-- `TriangleLayer`
 - `TriangleMultiPassLayer`
 - `MapLibreCameraSync`
 - `createMapLibreMercatorProjector`
 
-## 最小示例
+## 推荐示例
 
 ```js
-import {
-  MapLibreLayerHost,
-  createMapLibreMercatorProjector,
-} from '@windylib/maps-maplibre'
-import { TriangleLayer } from '@windylib/layers'
+import { MapLibreTriangleHost } from '@windylib/maps-maplibre'
 
-const projector = createMapLibreMercatorProjector()
-
-const host = new MapLibreLayerHost({
+const host = new MapLibreTriangleHost({
   container,
-  initialProps: {
-    vertices: [
-      [116.38, 39.9, 1],
-      [121.47, 31.23, 1],
-      [113.26, 23.13, 1],
-    ],
-    zoom: 4.2,
-    color: [255, 111, 60, 220],
-  },
-  createLayer: (props) => new TriangleLayer({
-    id: 'maplibre-triangle',
-    vertices: props.vertices,
-    color: props.color,
-    projectPosition: projector,
-  }),
+  id: 'triangle-layer',
+  vertices: [
+    [116.38, 39.9, 1],
+    [121.47, 31.23, 1],
+    [113.26, 23.13, 1],
+  ],
+  zoom: 4.2,
+  color: '#ff6f3c',
+  alpha: 0.86,
+  invertEnabled: true,
 })
 
 host.attach()
 ```
+
+相比底层拼装方式，这个 API 已经帮你处理了：
+
+- `TriangleMultiPassLayer` 的创建
+- `createMapLibreMercatorProjector()` 的调用
+- `projectPosition` 注入
+- 十六进制颜色到 RGBA 数组的转换
 
 ## 为什么 MapLibre 侧更适合 multipass
 
@@ -58,16 +59,39 @@ host.attach()
 ## 启用多 pass
 
 ```js
-import { TriangleMultiPassLayer } from '@windylib/layers'
+import { MapLibreTriangleHost } from '@windylib/maps-maplibre'
 
-createLayer: (props) => new TriangleMultiPassLayer({
+const host = new MapLibreTriangleHost({
+  container,
   id: 'triangle-multipass',
-  vertices: props.vertices,
-  color: props.color,
-  projectPosition: projector,
+  vertices: [
+    [116.38, 39.9, 1],
+    [121.47, 31.23, 1],
+    [113.26, 23.13, 1],
+  ],
+  zoom: 4.2,
+  color: '#ff6f3c',
+  alpha: 0.86,
   invertEnabled: true,
 })
 ```
+
+## 什么时候看底层 API
+
+如果你只是想把三角形图层放到 MapLibre 上，优先看 `MapLibreTriangleHost`。
+
+如果你需要以下能力，再继续看底层接口：
+
+- 自定义 layer class
+- 自定义投影函数
+- 自定义 shader 组装
+- 观测更底层的 pass 生命周期
+
+这时再看：
+
+- `MapLibreLayerHost`
+- `TriangleMultiPassLayer`
+- `createMapLibreMercatorProjector`
 
 ## 相机同步
 

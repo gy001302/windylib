@@ -46,7 +46,7 @@ pnpm build:storybook
 - `packages/layers`：通用图层实现
 - `packages/maps/leaflet`：Leaflet 适配器与 canvas host
 - `packages/maps/maplibre`：MapLibre host 与工具函数
-- `packages/storybook`：示例与可视化验证环境
+- `storybook`：示例与可视化验证环境
 
 ## 推荐的理解顺序
 

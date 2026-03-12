@@ -4,11 +4,8 @@ import {
   BaseLayer,
   invertColor,
   normalizeColor,
+  shaders,
 } from '@windylib/core'
-// eslint-disable-next-line import/no-unresolved
-import defaultVertexShader from '../../../core/src/shaders/map-triangle/triangle.vs.glsl?raw'
-// eslint-disable-next-line import/no-unresolved
-import defaultFragmentShader from '../../../core/src/shaders/map-triangle/triangle.fs.glsl?raw'
 import {
   baseDefaultProps,
   buildTriangleGeometry,
@@ -20,11 +17,11 @@ const defaultProps = {
   ...baseDefaultProps,
   vertexShader: {
     ...baseDefaultProps.vertexShader,
-    value: defaultVertexShader,
+    value: shaders.mapTriangle.vertex,
   },
   fragmentShader: {
     ...baseDefaultProps.fragmentShader,
-    value: defaultFragmentShader,
+    value: shaders.mapTriangle.fragment,
   },
 }
 
@@ -53,9 +50,9 @@ export class TriangleLayer extends BaseLayer {
 
   static defaultProps = defaultProps
 
-  static defaultVertexShader = defaultVertexShader
+  static defaultVertexShader = shaders.mapTriangle.vertex
 
-  static defaultFragmentShader = defaultFragmentShader
+  static defaultFragmentShader = shaders.mapTriangle.fragment
 
   constructor(props = {}) {
     super(props)

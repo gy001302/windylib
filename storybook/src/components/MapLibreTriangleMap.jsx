@@ -1,40 +1,30 @@
 import { useEffect, useRef } from 'react'
-import { TriangleMultiPassLayer } from '@windylib/layers'
 import {
-  createMapLibreMercatorProjector,
-  MapLibreLayerHost,
-  toColorArray,
+  MapLibreTriangleHost,
 } from '@windylib/maps-maplibre'
 
 export function MapLibreTriangleMap(props) {
   const hostRef = useRef(null)
   const mapHostRef = useRef(null)
-  const projectorRef = useRef(createMapLibreMercatorProjector())
 
   useEffect(() => {
     if (!hostRef.current) {
       return undefined
     }
 
-    const mapHost = new MapLibreLayerHost({
+    const mapHost = new MapLibreTriangleHost({
       container: hostRef.current,
-      initialProps: {
-        vertices: props.vertices,
-        zoom: props.zoom,
-        color: toColorArray(props.color, props.alpha),
-        invertEnabled: props.invertEnabled,
-        vertexShader: props.vertexShader,
-        fragmentShader: props.fragmentShader,
-      },
-      createLayer: (layerProps) => new TriangleMultiPassLayer({
-        id: 'triangle-multipass-map-only',
-        vertices: layerProps.vertices,
-        color: layerProps.color,
-        projectPosition: projectorRef.current,
-        invertEnabled: layerProps.invertEnabled,
-        vertexShader: layerProps.vertexShader,
-        fragmentShader: layerProps.fragmentShader,
-      }),
+      id: 'triangle-multipass-map-only',
+      vertices: props.vertices,
+      zoom: props.zoom,
+      color: props.color,
+      alpha: props.alpha,
+      invertEnabled: props.invertEnabled,
+      vertexShader: props.vertexShader,
+      fragmentShader: props.fragmentShader,
+      onShaderStateChange: props.onShaderStateChange,
+      onPassStateChange: props.onPassStateChange,
+      onLifecycleStateChange: props.onLifecycleStateChange,
     })
     mapHost.attach()
     mapHostRef.current = mapHost
@@ -48,16 +38,23 @@ export function MapLibreTriangleMap(props) {
     mapHostRef.current?.setProps({
       vertices: props.vertices,
       zoom: props.zoom,
-      color: toColorArray(props.color, props.alpha),
+      color: props.color,
+      alpha: props.alpha,
       invertEnabled: props.invertEnabled,
       vertexShader: props.vertexShader,
       fragmentShader: props.fragmentShader,
+      onShaderStateChange: props.onShaderStateChange,
+      onPassStateChange: props.onPassStateChange,
+      onLifecycleStateChange: props.onLifecycleStateChange,
     })
   }, [
     props.alpha,
     props.color,
     props.fragmentShader,
     props.invertEnabled,
+    props.onLifecycleStateChange,
+    props.onPassStateChange,
+    props.onShaderStateChange,
     props.vertexShader,
     props.vertices,
     props.zoom,
