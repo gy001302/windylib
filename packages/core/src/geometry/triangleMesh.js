@@ -1,3 +1,4 @@
+// 三角形网格工具，负责三角形插值、细分和颜色处理等纯计算逻辑。
 export function interpolateTriangle(vertices, u, v) {
   const a = vertices[0]
   const b = vertices[1]

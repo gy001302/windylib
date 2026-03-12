@@ -1,3 +1,4 @@
+// 投影三角形 renderer，把经纬度三角形投到屏幕空间并直接完成绘制。
 import { Buffer } from '@luma.gl/core'
 import { Model } from '@luma.gl/engine'
 import {
