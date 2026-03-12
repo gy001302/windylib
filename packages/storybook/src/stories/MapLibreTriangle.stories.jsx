@@ -1,4 +1,4 @@
-import { MapLibreTriangleMap } from '../components/MapLibreTriangleMap'
+import { TriangleMultiPassLifecyclePreview } from '../components/TriangleMultiPassLifecyclePreview'
 // eslint-disable-next-line import/no-unresolved
 import { TriangleMultiPassLayer } from '@windylib/layers'
 
@@ -9,8 +9,8 @@ const cityTriangleVertices = [
 ]
 
 const meta = {
-  title: 'Maps/DeckGL Triangle MultiPass',
-  component: MapLibreTriangleMap,
+  title: 'Maps/MapLibre Triangle MultiPass',
+  component: TriangleMultiPassLifecyclePreview,
   tags: ['autodocs'],
   parameters: {
     layout: 'fullscreen',
@@ -39,7 +39,7 @@ export default meta
 
 export const Default = {
   render: (args) => (
-    <MapLibreTriangleMap
+    <TriangleMultiPassLifecyclePreview
       vertices={args.vertices}
       zoom={args.zoom}
       color={args.color}

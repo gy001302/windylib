@@ -1,17 +1,6 @@
 import { luma } from '@luma.gl/core'
 import { webgl2Adapter } from '@luma.gl/webgl'
-
-function resolveDefaultProps(defaultProps = {}) {
-  return Object.fromEntries(
-    Object.entries(defaultProps).map(([key, value]) => {
-      if (value && typeof value === 'object' && 'value' in value) {
-        return [key, value.value]
-      }
-
-      return [key, value]
-    }),
-  )
-}
+import { diffLayerProps, resolveDefaultProps } from './lifecycle/props'
 
 export class BaseLayer {
   static componentName = 'BaseLayer'
@@ -31,6 +20,7 @@ export class BaseLayer {
       ...props,
     }
     this.id = this.props.id
+    this.stateInitialized = false
   }
 
   setProps(nextProps = {}) {
@@ -40,11 +30,18 @@ export class BaseLayer {
       ...nextProps,
     }
     this.id = this.props.id
-    this.onPropsChange({
+
+    const updateParams = {
       props: this.props,
       oldProps: previousProps,
       nextProps,
-    })
+      changeFlags: this.diffProps(previousProps, this.props, nextProps),
+    }
+
+    if (this.stateInitialized && this.shouldUpdateState(updateParams)) {
+      this.updateState(updateParams)
+    }
+
     this.requestRender()
     return this
   }
@@ -66,7 +63,20 @@ export class BaseLayer {
       }
 
       this.device = device
-      this.onDeviceReady(device)
+      const lifecycleParams = {
+        device,
+        map: this.map,
+        gl: this.gl,
+        props: this.props,
+      }
+      this.initializeState(lifecycleParams)
+      this.stateInitialized = true
+      this.updateState({
+        props: this.props,
+        oldProps: null,
+        nextProps: this.props,
+        changeFlags: this.diffProps({}, this.props, this.props),
+      })
       this.requestRender()
       return device
     }).catch((error) => {
@@ -77,7 +87,13 @@ export class BaseLayer {
 
   onRemove(map, gl) {
     this.destroyed = true
-    this.onBeforeRemove({ map, gl })
+    this.finalizeState({
+      map,
+      gl,
+      device: this.device,
+      props: this.props,
+    })
+    this.stateInitialized = false
     this.device?.destroy()
     this.device = null
     this.map = null
@@ -85,8 +101,64 @@ export class BaseLayer {
     this.devicePromise = null
   }
 
+  render(gl, args) {
+    if (!this.device || !this.stateInitialized) {
+      return
+    }
+
+    this.draw({
+      gl,
+      ...args,
+    })
+  }
+
   requestRender() {
     this.map?.triggerRepaint?.()
+  }
+
+  diffProps(oldProps, props, nextProps = {}) {
+    return diffLayerProps({
+      defaultProps: this.constructor.defaultProps,
+      oldProps,
+      props,
+      nextProps,
+    })
+  }
+
+  initializeState({ device } = {}) {
+    this.props.onLifecycleStateChange?.({
+      id: this.id,
+      stage: 'initialize',
+    })
+    this.onDeviceReady(device)
+  }
+
+  shouldUpdateState({ changeFlags }) {
+    return Boolean(changeFlags?.propsChanged)
+  }
+
+  updateState(params) {
+    this.props.onLifecycleStateChange?.({
+      id: this.id,
+      stage: 'update',
+      changeFlags: params.changeFlags,
+    })
+    this.onPropsChange(params)
+  }
+
+  draw() {
+    this.props.onLifecycleStateChange?.({
+      id: this.id,
+      stage: 'draw',
+    })
+  }
+
+  finalizeState(params = {}) {
+    this.props.onLifecycleStateChange?.({
+      id: this.id,
+      stage: 'finalize',
+    })
+    this.onBeforeRemove(params)
   }
 
   onPropsChange() {}

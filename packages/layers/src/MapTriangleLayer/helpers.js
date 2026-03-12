@@ -35,6 +35,11 @@ export const baseDefaultProps = {
     value: null,
     compare: false,
   },
+  onLifecycleStateChange: {
+    type: 'function',
+    value: null,
+    compare: false,
+  },
   projectPosition: {
     type: 'function',
     value: null,
