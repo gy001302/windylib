@@ -3,7 +3,7 @@ import { Texture } from '@luma.gl/core'
 import { MapTriangleLayer } from '../MapTriangleLayer'
 import {
   BasePass,
-  BasePostProcessingPass,
+  FullscreenPostProcessingPass,
   MultiPassRenderer,
   ResourceManager,
 } from '@windylib/core'
@@ -153,7 +153,7 @@ class TriangleRenderPass extends BasePass {
   }
 }
 
-class InvertPass extends BasePostProcessingPass {
+class InvertPass extends FullscreenPostProcessingPass {
   getFragmentShader() {
     return INVERT_FRAGMENT_SHADER
   }
