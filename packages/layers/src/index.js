@@ -1,2 +1,2 @@
-export { MapTriangleLayer } from './MapTriangleLayer/index.js'
+export { TriangleLayer } from './TriangleLayer/index.js'
 export { TriangleMultiPassLayer } from './TriangleMultiPassLayer/index.js'

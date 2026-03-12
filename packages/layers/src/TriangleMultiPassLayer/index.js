@@ -1,6 +1,6 @@
 /* eslint-disable max-classes-per-file */
 import { Texture } from '@luma.gl/core'
-import { MapTriangleLayer } from '../MapTriangleLayer'
+import { TriangleLayer } from '../TriangleLayer'
 import {
   BasePass,
   FullscreenPostProcessingPass,
@@ -159,13 +159,13 @@ class InvertPass extends FullscreenPostProcessingPass {
   }
 }
 
-export class TriangleMultiPassLayer extends MapTriangleLayer {
+export class TriangleMultiPassLayer extends TriangleLayer {
   static componentName = 'TriangleMultiPassLayer'
 
   static layerName = 'TriangleMultiPassLayer'
 
   static defaultProps = {
-    ...MapTriangleLayer.defaultProps,
+    ...TriangleLayer.defaultProps,
     invertEnabled: {
       type: 'boolean',
       value: false,
@@ -178,9 +178,9 @@ export class TriangleMultiPassLayer extends MapTriangleLayer {
     },
   }
 
-  static defaultVertexShader = MapTriangleLayer.defaultVertexShader
+  static defaultVertexShader = TriangleLayer.defaultVertexShader
 
-  static defaultFragmentShader = MapTriangleLayer.defaultFragmentShader
+  static defaultFragmentShader = TriangleLayer.defaultFragmentShader
 
   constructor(props = {}) {
     super(props)

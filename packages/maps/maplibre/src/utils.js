@@ -1,4 +1,4 @@
-import maplibregl from 'maplibre-gl'
+import * as maplibregl from 'maplibre-gl'
 
 export function getMapCenter(vertices) {
   if (!Array.isArray(vertices) || !vertices.length) {

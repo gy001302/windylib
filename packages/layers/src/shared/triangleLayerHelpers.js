@@ -40,9 +40,14 @@ export const baseDefaultProps = {
     value: null,
     compare: false,
   },
+  invertEnabled: {
+    type: 'boolean',
+    value: false,
+    compare: true,
+  },
 }
 
-export function toProjectedPositions(vertices, subdivisionSteps, projectPosition = null) {
+export function buildTriangleGeometry(vertices, subdivisionSteps, projectPosition = null) {
   const meshVertices = buildTriangleMesh(vertices, subdivisionSteps)
   const positions = new Float32Array(meshVertices.length * 2)
 
@@ -56,6 +61,7 @@ export function toProjectedPositions(vertices, subdivisionSteps, projectPosition
   })
 
   return {
+    meshVertices,
     positions,
     vertexCount: meshVertices.length,
   }

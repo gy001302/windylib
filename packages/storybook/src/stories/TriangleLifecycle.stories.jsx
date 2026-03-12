@@ -1,12 +1,11 @@
-import { MapLibreTriangleMap } from '../components/MapLibreTriangleMap'
+import { TriangleMultiPassLifecyclePreview } from '../components/TriangleMultiPassLifecyclePreview'
 // eslint-disable-next-line import/no-unresolved
 import { TriangleMultiPassLayer } from '@windylib/layers'
 import { cityTriangleVertices } from './constants'
 
 const meta = {
-  title: 'Maps/DeckGL Triangle MultiPass',
-  component: MapLibreTriangleMap,
-  tags: ['autodocs'],
+  title: 'Foundations/Triangle Lifecycle',
+  component: TriangleMultiPassLifecyclePreview,
   parameters: {
     layout: 'fullscreen',
   },
@@ -15,7 +14,7 @@ const meta = {
     zoom: 4.2,
     color: '#ff6f3c',
     alpha: 0.86,
-    invertEnabled: false,
+    invertEnabled: true,
     vertexShader: TriangleMultiPassLayer.defaultVertexShader,
     fragmentShader: TriangleMultiPassLayer.defaultFragmentShader,
   },
@@ -32,22 +31,4 @@ const meta = {
 
 export default meta
 
-export const Default = {
-  render: (args) => (
-    <MapLibreTriangleMap
-      vertices={args.vertices}
-      zoom={args.zoom}
-      color={args.color}
-      alpha={args.alpha}
-      invertEnabled={args.invertEnabled}
-      vertexShader={args.vertexShader}
-      fragmentShader={args.fragmentShader}
-    />
-  ),
-}
-
-export const Invert = {
-  args: {
-    invertEnabled: true,
-  },
-}
+export const Default = {}

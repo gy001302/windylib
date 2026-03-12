@@ -1,8 +1,8 @@
 import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-// eslint-disable-next-line import/no-unresolved
-import { CanvasOverlayRendererHost, ProjectedTriangleRenderer } from '@windylib/core'
+import { CanvasOverlayRendererHost } from '@windylib/core'
+import { TriangleLayer } from '@windylib/layers'
 import { LeafletCanvasHost, LeafletMapAdapter } from '@windylib/maps-leaflet'
 
 function getMapCenter(vertices) {
@@ -56,8 +56,8 @@ export function LeafletTriangleMap(props) {
       maxZoom: 19,
     }).addTo(map)
 
-    const renderer = new ProjectedTriangleRenderer({
-      id: 'leaflet-triangle-renderer',
+    const renderer = new TriangleLayer({
+      id: 'leaflet-triangle-layer',
       vertices: props.vertices,
       color: toColorArray(props.color, props.alpha),
       invertEnabled: props.invertEnabled,
@@ -68,6 +68,7 @@ export function LeafletTriangleMap(props) {
       map,
       mapAdapter: new LeafletMapAdapter(map),
     })
+
     const rendererHost = new CanvasOverlayRendererHost({
       canvasHost,
       renderer,
