@@ -1,3 +1,4 @@
+// 后处理 pass 基类，提供后处理类型标记和通用开关能力。
 import { BasePass, PassType } from './BasePass'
 
 export class BasePostProcessingPass extends BasePass {

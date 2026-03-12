@@ -1,3 +1,4 @@
+// 全屏后处理 pass 基类，用一张全屏四边形消费输入纹理并输出结果。
 import { Buffer, Texture } from '@luma.gl/core'
 import { Model } from '@luma.gl/engine'
 import { BasePostProcessingPass } from './BasePostProcessingPass'
@@ -83,8 +84,6 @@ export class FullscreenPostProcessingPass extends BasePostProcessingPass {
     })
 
     try {
-      device.gl.enable(device.gl.BLEND)
-      device.gl.blendFunc(device.gl.SRC_ALPHA, device.gl.ONE_MINUS_SRC_ALPHA)
       this.model.setBindings({
         u_Texture: input,
       })
@@ -94,7 +93,6 @@ export class FullscreenPostProcessingPass extends BasePostProcessingPass {
       }
       this.model.draw(renderPass)
     } finally {
-      device.gl.disable(device.gl.BLEND)
       renderPass.end()
     }
 

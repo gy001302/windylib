@@ -2,9 +2,9 @@ import { Buffer } from '@luma.gl/core'
 import { Model } from '@luma.gl/engine'
 import { BaseLayer, buildTriangleMesh, normalizeColor } from '@windylib/core'
 // eslint-disable-next-line import/no-unresolved
-import defaultVertexShader from '../../../core/src/shaders/map-triangle/triangle.vs.glsl?raw'
+import defaultVertexShader from '../../../core/src/shaderlib/map-triangle/triangle.vs.glsl?raw'
 // eslint-disable-next-line import/no-unresolved
-import defaultFragmentShader from '../../../core/src/shaders/map-triangle/triangle.fs.glsl?raw'
+import defaultFragmentShader from '../../../core/src/shaderlib/map-triangle/triangle.fs.glsl?raw'
 
 const defaultProps = {
   id: 'map-triangle-layer',

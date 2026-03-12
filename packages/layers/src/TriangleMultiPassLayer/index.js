@@ -1,4 +1,4 @@
-import { MapTriangleLayer } from '../MapTriangleLayer'
+import { MapTriangleLayer } from '../MapTriangleLayer/index.js'
 import { MultiPassRenderer, ResourceManager } from '@windylib/core'
 import { RenderPass } from './RenderPass'
 import { InvertPass } from './InvertPass'

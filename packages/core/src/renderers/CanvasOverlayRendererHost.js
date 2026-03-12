@@ -1,3 +1,4 @@
+// 叠加式 canvas host，负责创建独立 WebGL2 上下文并驱动 renderer 重绘。
 import { luma } from '@luma.gl/core'
 import { webgl2Adapter } from '@luma.gl/webgl'
 
