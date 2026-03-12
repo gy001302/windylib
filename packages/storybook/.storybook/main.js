@@ -12,7 +12,6 @@ const mapsMapLibreEntryPath = resolve(packageDir, '../maps/maplibre/src/index.js
 
 export default {
   stories: ['../src/stories/**/*.stories.@(js|jsx|mjs|ts|tsx)'],
-  staticDirs: ['../../../public'],
   addons: [
     '@storybook/addon-links',
     '@storybook/addon-essentials',

@@ -1,5 +1,5 @@
 import maplibregl from 'maplibre-gl'
-import { MapHost } from './MapHost'
+import { MapHost } from '../../shared/MapHost'
 import { getMapCenter } from './utils'
 
 const DEFAULT_STYLE = 'https://demotiles.maplibre.org/style.json'

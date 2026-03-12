@@ -105,7 +105,9 @@ export class ProjectedTriangleRenderer {
         Math.max(1, Math.floor(frame.size.width * frame.devicePixelRatio)),
         Math.max(1, Math.floor(frame.size.height * frame.devicePixelRatio)),
       ],
-      u_color: normalizeColor(this.props.invertEnabled ? invertColor(this.props.color) : this.props.color),
+      u_color: normalizeColor(
+        this.props.invertEnabled ? invertColor(this.props.color) : this.props.color,
+      ),
     }
 
     const renderPass = frame.beginRenderPass({

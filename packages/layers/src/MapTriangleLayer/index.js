@@ -1,90 +1,27 @@
 import { Buffer } from '@luma.gl/core'
 import { Model } from '@luma.gl/engine'
-import { BaseLayer, buildTriangleMesh, normalizeColor } from '@windylib/core'
+import { BaseLayer, normalizeColor } from '@windylib/core'
 // eslint-disable-next-line import/no-unresolved
 import defaultVertexShader from '../../../core/src/shaders/map-triangle/triangle.vs.glsl?raw'
 // eslint-disable-next-line import/no-unresolved
 import defaultFragmentShader from '../../../core/src/shaders/map-triangle/triangle.fs.glsl?raw'
+import {
+  baseDefaultProps,
+  buildFragmentShader,
+  buildVertexShader,
+  toProjectedPositions,
+} from './helpers'
 
 const defaultProps = {
-  id: 'map-triangle-layer',
-  vertices: {
-    type: 'object',
-    compare: true,
-    value: [
-      [118.3, 31.7, 0],
-      [119.4, 32.2, 0],
-      [118.6, 32.8, 0],
-    ],
-  },
-  color: {
-    type: 'color',
-    value: [255, 120, 64, 220],
-  },
-  subdivisionSteps: {
-    type: 'number',
-    value: 24,
-    compare: true,
-  },
+  ...baseDefaultProps,
   vertexShader: {
-    type: 'string',
+    ...baseDefaultProps.vertexShader,
     value: defaultVertexShader,
-    compare: true,
   },
   fragmentShader: {
-    type: 'string',
+    ...baseDefaultProps.fragmentShader,
     value: defaultFragmentShader,
-    compare: true,
   },
-  onShaderStateChange: {
-    type: 'function',
-    value: null,
-    compare: false,
-  },
-  projectPosition: {
-    type: 'function',
-    value: null,
-    compare: false,
-  },
-}
-
-function toProjectedPositions(vertices, subdivisionSteps, projectPosition = null) {
-  const meshVertices = buildTriangleMesh(vertices, subdivisionSteps)
-  const projectedPositions = new Float32Array(meshVertices.length * 2)
-
-  meshVertices.forEach((vertex, vertexIndex) => {
-    const projected = typeof projectPosition === 'function'
-      ? projectPosition(vertex)
-      : { x: Number(vertex[0] ?? 0), y: Number(vertex[1] ?? 0) }
-    const offset = vertexIndex * 2
-    projectedPositions[offset] = Number(projected?.x ?? projected?.[0] ?? 0)
-    projectedPositions[offset + 1] = Number(projected?.y ?? projected?.[1] ?? 0)
-  })
-
-  return {
-    positions: projectedPositions,
-    vertexCount: meshVertices.length,
-  }
-}
-
-function buildVertexShader(shaderDescription, vertexShader) {
-  return `#version 300 es
-${shaderDescription.vertexShaderPrelude}
-${shaderDescription.define}
-
-in vec2 a_pos;
-
-${vertexShader}`
-}
-
-function buildFragmentShader(fragmentShader) {
-  return `#version 300 es
-precision highp float;
-
-uniform vec4 u_color;
-out vec4 fragColor;
-
-${fragmentShader}`
 }
 
 export class MapTriangleLayer extends BaseLayer {

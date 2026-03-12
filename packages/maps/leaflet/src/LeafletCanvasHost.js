@@ -1,4 +1,4 @@
-import { MapHost } from './MapHost'
+import { MapHost } from '../../shared/MapHost'
 import { LeafletMapAdapter } from './LeafletMapAdapter'
 
 const DEFAULT_CLASS_NAME = 'windylib-leaflet-overlay'

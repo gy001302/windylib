@@ -1,1 +1,0 @@
-{"version":3,"file":"ICameraService.js","sourceRoot":"","sources":["ICameraService.ts"],"names":[],"mappings":"AAEA,kBAAkB;AAClB,MAAM,CAAC,MAAM,aAAa,GAAG;IAC3B,gBAAgB,EAAE,oBAAoB;IACtC,UAAU,EAAE,cAAc;IAC1B,oBAAoB,EAAE,wBAAwB;IAC9C,IAAI,EAAE,QAAQ;IACd,SAAS,EAAE,aAAa;IACxB,aAAa,EAAE,iBAAiB;IAChC,cAAc,EAAE,kBAAkB;CACnC,CAAC"}

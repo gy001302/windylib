@@ -24,15 +24,21 @@ module.exports = {
     'node_modules/',
     'storybook/storybook-static/',
     'storybook-static/',
+    'packages/storybook/storybook-static/',
+    'packages/storybook/.storybook-home/',
     'lib/dist/',
     '.storybook-home/',
     'storybook/.storybook-home/',
+    'packages/core/src/lib/',
+    'packages/core/src/viewports/',
+    'packages/core/src/shaderlib/',
   ],
   overrides: [
     {
       files: [
         '.storybook/*.js',
         'storybook/.storybook/*.js',
+        'packages/storybook/.storybook/*.js',
         'vite.config.js',
         'lib/vite.config.js',
       ],
@@ -48,13 +54,13 @@ module.exports = {
       },
     },
     {
-      files: ['storybook/src/**/*.jsx'],
+      files: ['packages/storybook/src/**/*.jsx'],
       rules: {
         'import/no-unresolved': 'off',
       },
     },
     {
-      files: ['storybook/src/**/*.stories.jsx'],
+      files: ['packages/storybook/src/**/*.stories.jsx'],
       rules: {
         'import/no-anonymous-default-export': 'off',
       },
