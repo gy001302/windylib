@@ -22,7 +22,6 @@
     "@luma.gl/core": "^9.2.6",
     "@luma.gl/engine": "^9.2.6",
     "@luma.gl/webgl": "^9.2.6",
-    "gl-matrix": "^3.4.4",
-    "maplibre-gl": "^5.19.0"
+    "gl-matrix": "^3.4.4"
   }
 }

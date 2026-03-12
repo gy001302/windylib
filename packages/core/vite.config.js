@@ -20,7 +20,7 @@ export default defineConfig({
         '@luma.gl/core',
         '@luma.gl/engine',
         '@luma.gl/webgl',
-        'maplibre-gl',
+
       ],
     },
   },
