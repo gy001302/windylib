@@ -14,8 +14,9 @@ export default {
           items: [
             { text: '快速开始', link: '/guide/getting-started' },
             { text: '架构设计', link: '/guide/architecture' },
+            { text: '示例预览', link: '/guide/examples' },
             { text: '图层生命周期', link: '/guide/layer-lifecycle' },
-            { text: 'TriangleLayer 使用', link: '/guide/triangle-layer' },
+            { text: 'Triangle 图层', link: '/guide/triangle-layer' },
             { text: 'Leaflet 接入', link: '/guide/leaflet-integration' },
             { text: 'MapLibre 接入', link: '/guide/maplibre-integration' },
             { text: 'Storybook', link: '/guide/storybook' },

@@ -2,7 +2,7 @@ import { useEffect, useRef } from 'react'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
 import { CanvasOverlayRendererHost } from '@windylib/core'
-import { TriangleLayer } from '@windylib/layers'
+import { TriangleMultiPassLayer } from '@windylib/layers'
 import { LeafletCanvasHost, LeafletMapAdapter } from '@windylib/maps-leaflet'
 
 function getMapCenter(vertices) {
@@ -56,7 +56,7 @@ export function LeafletTriangleMap(props) {
       maxZoom: 19,
     }).addTo(map)
 
-    const renderer = new TriangleLayer({
+    const renderer = new TriangleMultiPassLayer({
       id: 'leaflet-triangle-layer',
       vertices: props.vertices,
       color: toColorArray(props.color, props.alpha),

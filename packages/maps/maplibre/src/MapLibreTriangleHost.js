@@ -13,18 +13,45 @@ function normalizeColor(color, alpha) {
   return toColorArray(color, alpha)
 }
 
+function assignIfDefined(target, key, value) {
+  if (value !== undefined) {
+    target[key] = value
+  }
+}
+
+function createLayerProps(id, projectPosition, layerProps) {
+  const props = {
+    id,
+    vertices: layerProps.vertices,
+    color: layerProps.color,
+    projectPosition,
+    invertEnabled: layerProps.invertEnabled,
+  }
+
+  assignIfDefined(props, 'vertexShader', layerProps.vertexShader)
+  assignIfDefined(props, 'fragmentShader', layerProps.fragmentShader)
+  assignIfDefined(props, 'onShaderStateChange', layerProps.onShaderStateChange)
+  assignIfDefined(props, 'onPassStateChange', layerProps.onPassStateChange)
+  assignIfDefined(props, 'onLifecycleStateChange', layerProps.onLifecycleStateChange)
+
+  return props
+}
+
 function toInternalProps(userProps = {}) {
-  return {
+  const internalProps = {
     vertices: userProps.vertices,
     zoom: userProps.zoom,
     color: normalizeColor(userProps.color, userProps.alpha),
     invertEnabled: Boolean(userProps.invertEnabled),
-    vertexShader: userProps.vertexShader,
-    fragmentShader: userProps.fragmentShader,
-    onShaderStateChange: userProps.onShaderStateChange,
-    onPassStateChange: userProps.onPassStateChange,
-    onLifecycleStateChange: userProps.onLifecycleStateChange,
   }
+
+  assignIfDefined(internalProps, 'vertexShader', userProps.vertexShader)
+  assignIfDefined(internalProps, 'fragmentShader', userProps.fragmentShader)
+  assignIfDefined(internalProps, 'onShaderStateChange', userProps.onShaderStateChange)
+  assignIfDefined(internalProps, 'onPassStateChange', userProps.onPassStateChange)
+  assignIfDefined(internalProps, 'onLifecycleStateChange', userProps.onLifecycleStateChange)
+
+  return internalProps
 }
 
 export class MapLibreTriangleHost extends MapLibreLayerHost {
@@ -39,23 +66,13 @@ export class MapLibreTriangleHost extends MapLibreLayerHost {
     const internalProps = toInternalProps(userProps)
 
     super({
-      container: userProps.container,
-      style: userProps.style,
+      map: userProps.map,
+      mapAdapter: userProps.mapAdapter,
       projection: userProps.projection,
-      controls: userProps.controls,
       initialProps: internalProps,
-      createLayer: (layerProps) => new layerClass({
-        id,
-        vertices: layerProps.vertices,
-        color: layerProps.color,
-        projectPosition,
-        invertEnabled: layerProps.invertEnabled,
-        vertexShader: layerProps.vertexShader,
-        fragmentShader: layerProps.fragmentShader,
-        onShaderStateChange: layerProps.onShaderStateChange,
-        onPassStateChange: layerProps.onPassStateChange,
-        onLifecycleStateChange: layerProps.onLifecycleStateChange,
-      }),
+      createLayer: (layerProps) => new layerClass(
+        createLayerProps(id, projectPosition, layerProps),
+      ),
     })
 
     this.id = id

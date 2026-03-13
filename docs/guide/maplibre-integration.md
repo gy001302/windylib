@@ -4,10 +4,14 @@ MapLibre 当前推荐通过高阶宿主 `MapLibreTriangleHost` 接入。
 
 这页文档优先对应当前 Storybook 示例：
 
-- `Maps/DeckGL Triangle MultiPass`
+- `Maps/MapLibre Triangle MultiPass`
 - `Foundations/Triangle Lifecycle`
 
 这条链路更贴近地图本身的渲染生命周期。
+
+## 在线预览
+
+<iframe src="/examples/maplibre-triangle.html" style="width:100%;height:760px;border:1px solid #d7d3c8;border-radius:12px;background:#fff;"></iframe>
 
 ## 关键对象
 
@@ -20,10 +24,18 @@ MapLibre 当前推荐通过高阶宿主 `MapLibreTriangleHost` 接入。
 ## 推荐示例
 
 ```js
+import * as maplibregl from 'maplibre-gl'
 import { MapLibreTriangleHost } from '@windylib/maps-maplibre'
 
-const host = new MapLibreTriangleHost({
+const map = new maplibregl.Map({
   container,
+  style: 'https://demotiles.maplibre.org/style.json',
+  center: [117.0367, 31.42],
+  zoom: 4.2,
+})
+
+const host = new MapLibreTriangleHost({
+  map,
   id: 'triangle-layer',
   vertices: [
     [116.38, 39.9, 1],
@@ -59,10 +71,18 @@ host.attach()
 ## 启用多 pass
 
 ```js
+import * as maplibregl from 'maplibre-gl'
 import { MapLibreTriangleHost } from '@windylib/maps-maplibre'
 
-const host = new MapLibreTriangleHost({
+const map = new maplibregl.Map({
   container,
+  style: 'https://demotiles.maplibre.org/style.json',
+  center: [117.0367, 31.42],
+  zoom: 4.2,
+})
+
+const host = new MapLibreTriangleHost({
+  map,
   id: 'triangle-multipass',
   vertices: [
     [116.38, 39.9, 1],

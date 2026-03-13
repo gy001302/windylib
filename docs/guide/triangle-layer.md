@@ -1,35 +1,31 @@
-# TriangleLayer 使用
+# Triangle 图层
 
-`TriangleLayer` 是当前仓库最核心的公共图层。
+`TriangleMultiPassLayer` 是当前仓库唯一的公开三角形图层。
 
-它的目标不是绑定某一个地图框架，而是提供一套统一的三角形渲染能力，让不同宿主都能复用。
+它统一了两类能力：
 
-## 适合什么场景
+- 基础三角形绘制
+- 可选的后处理 pass，例如反色
 
-适合以下需求：
+同一个类可以挂到：
 
-- 用三个经纬度顶点渲染一个三角形区域
-- 需要对三角形做细分，提高视觉平滑度
-- 希望在 Leaflet 和 MapLibre 之间复用同一套图层逻辑
-- 需要自定义 shader，而不想重复写宿主接入逻辑
+- Leaflet overlay canvas
+- MapLibre shared WebGL
 
-## 核心属性
-
-最常用的属性包括：
+## 常用属性
 
 - `id`：图层唯一标识
-- `vertices`：三角形三个顶点，格式为 `[lng, lat, z]`
+- `vertices`：三个输入顶点，格式为 `[lng, lat, z]`
 - `color`：RGBA 数组，范围 `0-255`
 - `subdivisionSteps`：三角形细分等级
-- `invertEnabled`：是否启用基础反色逻辑
-- `vertexShader`：自定义顶点 shader 代码
-- `fragmentShader`：自定义片元 shader 代码
-- `projectPosition`：将输入位置投影到渲染坐标的函数
-- `onShaderStateChange`：用于观察 shader 编译或绘制状态
+- `invertEnabled`：是否启用反色 pass
+- `vertexShader`：自定义顶点 shader
+- `fragmentShader`：自定义片元 shader
+- `projectPosition`：将输入坐标投影到渲染坐标的函数
+- `onShaderStateChange`：观察 shader 编译和绘制状态
+- `onPassStateChange`：观察 pass 是否进入 render 阶段
 
-## 数据模型
-
-顶点输入约定为：
+## 输入数据
 
 ```js
 const vertices = [
@@ -39,69 +35,67 @@ const vertices = [
 ]
 ```
 
-WindyLib 内部会基于这 3 个点生成一个细分后的三角网格。
+WindyLib 会基于这 3 个点生成细分后的三角网格。
 
-## 最小示例
+## 最小实例化示例
 
 ```js
-import { TriangleLayer } from '@windylib/layers'
+import { TriangleMultiPassLayer } from '@windylib/layers'
 
-const layer = new TriangleLayer({
+const layer = new TriangleMultiPassLayer({
   id: 'triangle-layer',
-  vertices: [
-    [116.38, 39.9, 1],
-    [121.47, 31.23, 1],
-    [113.26, 23.13, 1],
-  ],
+  vertices,
   color: [255, 111, 60, 220],
   subdivisionSteps: 24,
-  projectPosition: (position) => ({
-    x: position[0],
-    y: position[1],
-  }),
 })
 ```
 
-## 渲染模式
+这段代码只表示“图层对象如何创建”，不是完整接入示例。
 
-`TriangleLayer` 当前支持两种宿主模式。
+## 运行方式
 
-### 1. 共享地图 WebGL 上下文
+### 1. 直接绘制
 
-这是 MapLibre 这类框架更自然的接入方式。
+当 `invertEnabled = false` 时，图层会直接把三角形输出到当前宿主的渲染目标。
 
-特点：
+这适合：
 
-- 图层直接参与地图渲染生命周期
-- 使用地图提供的投影数据
-- 更适合与地图底图统一渲染
+- 纯三角形覆盖
+- 不需要后处理
+- 追求更直接的渲染链路
 
-### 2. Overlay Canvas
+### 2. 先离屏再后处理
 
-这是 Leaflet 当前使用的方式。
+当 `invertEnabled = true` 时，图层会：
 
-特点：
+```text
+renderToTexture(...)
+-> renderPostProcessingPasses(...)
+```
 
-- 在地图上方创建独立 canvas
-- 通过 `project(position)` 把地理坐标映射到屏幕坐标
-- 宿主更简单，但渲染与底图是分离的
+当前内置的后处理 pass 是：
 
-## Shader 定制
+- `InvertPass`
 
-如果你要自定义 shader，通常只需要替换 `vertexShader` 或 `fragmentShader`。
+## 宿主兼容
 
-默认 shader 已经能直接绘制纯色三角形；自定义时更适合做：
+### Leaflet
 
-- 颜色实验
-- alpha 渐变
-- 基于插值坐标的视觉效果
+Leaflet 通过 overlay canvas 驱动这个图层。
 
-## 什么时候不用它
+这条路更轻，适合快速实验和视觉验证。
 
-如果你的需求是：
+### MapLibre
 
-- 复杂地理图层管理
-- 大规模矢量图层调度
-- 与现有 deck.gl 图层体系深度兼容
+MapLibre 通过 custom layer 驱动这个图层。
 
-那 `TriangleLayer` 更适合作为底层能力，而不是完整的最终业务图层系统。
+这条路更适合共享 WebGL 生命周期，也更适合做后处理。
+
+## 什么时候继续下探
+
+如果你只是想把三角形挂到地图上，优先看：
+
+- `MapLibreTriangleHost`
+- Leaflet 接入文档
+
+只有在你需要自定义 shader 或观察底层 pass 状态时，再直接实例化这个图层。

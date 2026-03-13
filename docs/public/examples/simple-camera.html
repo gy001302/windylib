@@ -1,0 +1,285 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WindyLib Example - SimpleCamera</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        background: #f5f1e8;
+        color: #1f1a14;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page {
+        min-height: 100vh;
+      }
+
+      .nav {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(31, 26, 20, 0.12);
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(8px);
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+        min-height: calc(100vh - 61px);
+      }
+
+      .panel {
+        padding: 20px;
+        border-right: 1px solid rgba(31, 26, 20, 0.12);
+        background: #f5f1e8;
+      }
+
+      .panel.dark {
+        background: #101820;
+        color: #f5f7fa;
+      }
+
+      .stage {
+        min-height: calc(100vh - 61px);
+      }
+
+      .map {
+        width: 100%;
+        height: calc(100vh - 61px);
+      }
+
+      .map.fit {
+        height: 100%;
+        min-height: calc(100vh - 61px);
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+
+      .field label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.72;
+      }
+
+      .field input {
+        width: 100%;
+      }
+
+      .field.checkbox {
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .field.checkbox label {
+        font-size: 14px;
+        text-transform: none;
+        letter-spacing: 0;
+        opacity: 1;
+      }
+
+      pre {
+        margin: 0;
+        padding: 16px;
+        background: rgba(15, 23, 32, 0.96);
+        color: #f6f7f9;
+        overflow: auto;
+        white-space: pre-wrap;
+        font: 12px/1.6 "IBM Plex Mono", "Fira Code", monospace;
+      }
+
+      .cards {
+        display: grid;
+        gap: 16px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 20px;
+      }
+
+      .intro {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      .intro h1 {
+        margin: 0 0 12px;
+        font-size: 32px;
+      }
+
+      .intro p {
+        margin: 0 0 24px;
+        opacity: 0.8;
+      }
+
+      .links {
+        display: grid;
+        gap: 14px;
+      }
+
+      .link-card {
+        display: block;
+        padding: 18px 20px;
+        border: 1px solid rgba(31, 26, 20, 0.12);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+      }
+
+      .link-card strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .small {
+        font-size: 12px;
+        opacity: 0.72;
+      }
+    </style>
+    
+  </head>
+  <body>
+    
+    <div class="page">
+      <div class="nav"><a href="./index.html">Examples</a> / Foundations / SimpleCamera</div>
+      <main style="padding:24px;">
+        <div class="grid">
+          <div class="cards">
+            <div class="field">
+              <label for="camera-z">Camera Z</label>
+              <input id="camera-z" type="range" min="0.1" max="20" step="0.1" value="5" />
+            </div>
+            <div class="field">
+              <label for="point-x">Point X</label>
+              <input id="point-x" type="range" min="-10" max="10" step="0.1" value="1" />
+            </div>
+            <div class="field">
+              <label for="point-y">Point Y</label>
+              <input id="point-y" type="range" min="-10" max="10" step="0.1" value="1" />
+            </div>
+            <div class="field">
+              <label for="jitter-x">Jitter X</label>
+              <input id="jitter-x" type="range" min="-0.1" max="0.1" step="0.001" value="0" />
+            </div>
+            <div class="field">
+              <label for="jitter-y">Jitter Y</label>
+              <input id="jitter-y" type="range" min="-0.1" max="0.1" step="0.001" value="0" />
+            </div>
+          </div>
+          <div class="grid" style="grid-template-columns:repeat(auto-fit,minmax(280px,1fr));">
+            <div>
+              <div class="small" style="margin-bottom:8px;">Camera State</div>
+              <pre id="camera-state"></pre>
+            </div>
+            <div>
+              <div class="small" style="margin-bottom:8px;">View Matrix</div>
+              <pre id="camera-view"></pre>
+            </div>
+            <div>
+              <div class="small" style="margin-bottom:8px;">Projection Matrix</div>
+              <pre id="camera-projection"></pre>
+            </div>
+            <div>
+              <div class="small" style="margin-bottom:8px;">View Projection Matrix</div>
+              <pre id="camera-view-projection"></pre>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+    <script>
+      (function suppressKnownLumaWarning() {
+        const originalError = console.error;
+        const ignoredFragment = 'This version of luma.gl has already been initialized';
+        console.error = function patchedConsoleError(...args) {
+          if (args.some((arg) => String(arg).includes(ignoredFragment))) {
+            return;
+          }
+          return originalError.apply(this, args);
+        };
+      }());
+    </script>
+    <script src="../sdk/wl-all.umd.js"></script>
+    <script>
+
+      function formatMatrix(values) {
+        const rows = [];
+        for (let index = 0; index < values.length; index += 4) {
+          rows.push(values.slice(index, index + 4).map((value) => Number(value).toFixed(3)).join('  '));
+        }
+        return rows.join('\n');
+      }
+
+      const cameraStateEl = document.getElementById('camera-state');
+      const cameraViewEl = document.getElementById('camera-view');
+      const cameraProjectionEl = document.getElementById('camera-projection');
+      const cameraViewProjectionEl = document.getElementById('camera-view-projection');
+
+      function renderCamera() {
+        const cameraService = new WindyLib.SimpleCameraService({
+          viewport: { width: 800, height: 600 },
+          position: [0, 0, Number(document.getElementById('camera-z').value)],
+          target: [0, 0, 0],
+          up: [0, 1, 0],
+          fov: (45 * Math.PI) / 180,
+          near: 0.1,
+          far: 1000,
+        });
+
+        const jitterX = Number(document.getElementById('jitter-x').value);
+        const jitterY = Number(document.getElementById('jitter-y').value);
+
+        if (jitterX !== 0 || jitterY !== 0) {
+          cameraService.jitterProjectionMatrix(jitterX, jitterY);
+        }
+
+        const projectedOrigin = cameraService.project([0, 0, 0]);
+        const projectedPoint = cameraService.project([
+          Number(document.getElementById('point-x').value),
+          Number(document.getElementById('point-y').value),
+          0,
+        ]);
+
+        cameraStateEl.textContent = JSON.stringify({
+          cameraPosition: cameraService.getCameraPosition().map((value) => Number(value.toFixed(3))),
+          projectedOrigin: projectedOrigin.map((value) => Number(value.toFixed(3))),
+          projectedPoint: projectedPoint.map((value) => Number(value.toFixed(3))),
+        }, null, 2);
+        cameraViewEl.textContent = formatMatrix(cameraService.getViewMatrix());
+        cameraProjectionEl.textContent = formatMatrix(cameraService.getProjectionMatrix());
+        cameraViewProjectionEl.textContent = formatMatrix(cameraService.getViewProjectionMatrix());
+      }
+
+      ['camera-z', 'point-x', 'point-y', 'jitter-x', 'jitter-y'].forEach((id) => {
+        document.getElementById(id).addEventListener('input', renderCamera);
+      });
+
+      renderCamera();
+    
+    </script>
+  </body>
+</html>

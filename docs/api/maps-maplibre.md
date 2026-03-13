@@ -18,10 +18,18 @@
 最小示例：
 
 ```js
+import * as maplibregl from 'maplibre-gl'
 import { MapLibreTriangleHost } from '@windylib/maps-maplibre'
 
-const host = new MapLibreTriangleHost({
+const map = new maplibregl.Map({
   container,
+  style: 'https://demotiles.maplibre.org/style.json',
+  center: [117.0367, 31.42],
+  zoom: 4.2,
+})
+
+const host = new MapLibreTriangleHost({
+  map,
   id: 'triangle-layer',
   vertices: [
     [116.38, 39.9, 1],
@@ -43,11 +51,10 @@ host.attach()
 
 ## `MapLibreLayerHost`
 
-创建 MapLibre 地图实例，并把可渲染图层挂进去。
+消费已有的 MapLibre 地图实例，并把可渲染图层挂进去。
 
 最小职责：
 
-- 创建地图
 - 控制初始视角
 - 在 `load` 后把 layer 加到地图里
 - 在 props 变化时同步中心点、缩放和图层 props
@@ -68,7 +75,7 @@ host.attach()
 
 返回一个将经纬度投影到 Mercator 坐标的辅助函数。
 
-它通常会直接传给底层 `TriangleLayer` 或 `TriangleMultiPassLayer` 的 `projectPosition`。
+它通常会直接传给底层 `TriangleMultiPassLayer` 的 `projectPosition`。
 
 如果你直接使用 `MapLibreTriangleHost`，通常不需要自己处理它。
 

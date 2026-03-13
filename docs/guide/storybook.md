@@ -23,3 +23,9 @@ pnpm storybook
 - shader 改动
 - 多 pass 渲染
 - 相机同步
+
+## 文档内示例
+
+如果只是想直接看运行结果，可以先打开：
+
+- [示例预览](/guide/examples)

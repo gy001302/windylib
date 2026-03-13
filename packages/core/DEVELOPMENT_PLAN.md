@@ -2,9 +2,9 @@
 
 ## 目标
 
-`packages/core` 要逐步演进成一个对标 `deck.gl` 的渲染内核。
+`packages/core` 要逐步演进成一个对标 `图层渲染框架` 的渲染内核。
 
-这里的“对标”不是照搬 API，而是补齐 deck.gl 最关键的几层能力：
+这里的“对标”不是照搬 API，而是补齐 图层渲染框架 最关键的几层能力：
 
 - 图层生命周期协议
 - 图层状态和变更标记
@@ -22,11 +22,11 @@
 - Storybook 页面逻辑
 - 具体业务图层集合
 
-## 对标 deck.gl 的模块映射
+## 对标 图层渲染框架 的模块映射
 
 ### 1. Layer 基类
 
-deck.gl 对应：
+图层渲染框架 对应：
 
 - `Layer`
 
@@ -50,7 +50,7 @@ deck.gl 对应：
 
 ### 2. LayerManager
 
-deck.gl 对应：
+图层渲染框架 对应：
 
 - `LayerManager`
 
@@ -74,7 +74,7 @@ deck.gl 对应：
 
 ### 3. ChangeFlags / State
 
-deck.gl 对应：
+图层渲染框架 对应：
 
 - `changeFlags`
 - `state`
@@ -100,7 +100,7 @@ deck.gl 对应：
 
 ### 4. AttributeManager
 
-deck.gl 对应：
+图层渲染框架 对应：
 
 - `AttributeManager`
 - accessor 驱动的 attribute 更新
@@ -125,7 +125,7 @@ deck.gl 对应：
 
 ### 5. Model / Geometry / Shader 装配层
 
-deck.gl 对应：
+图层渲染框架 对应：
 
 - `Model`
 - `Geometry`
@@ -151,7 +151,7 @@ deck.gl 对应：
 
 ### 6. Pass / Effects
 
-deck.gl 对应：
+图层渲染框架 对应：
 
 - `Effect`
 - post-process pipeline
@@ -179,7 +179,7 @@ deck.gl 对应：
 
 ### 7. Viewport / Camera
 
-deck.gl 对应：
+图层渲染框架 对应：
 
 - `View`
 - `Viewport`
@@ -204,7 +204,7 @@ deck.gl 对应：
 
 ### 8. 宿主接入协议
 
-deck.gl 对应：
+图层渲染框架 对应：
 
 - `Deck`
 - `MapboxOverlay`
@@ -278,7 +278,7 @@ deck.gl 对应：
 
 目标：
 
-- 建立 deck.gl 风格的 attribute 更新层
+- 建立 图层渲染框架 风格的 attribute 更新层
 
 先做：
 
@@ -393,7 +393,7 @@ deck.gl 对应：
 
 ## 当前结论
 
-`packages/core` 现在已经有了 deck.gl 式内核的雏形，但还没有进入“框架完整体”阶段。
+`packages/core` 现在已经有了 图层渲染框架 式内核的雏形，但还没有进入“框架完整体”阶段。
 
 最关键的差距不是目录，而是下面这四层还没补齐：
 

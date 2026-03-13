@@ -69,7 +69,7 @@
 
 地图绑定图层的基础类。
 
-`TriangleLayer` 与 `TriangleMultiPassLayer` 都建立在这个抽象之上。
+`TriangleMultiPassLayer` 建立在这个抽象之上。
 
 它提供了这些基础行为：
 
@@ -79,16 +79,6 @@
 - 请求重绘
 
 ## 多 pass
-
-### `MultiPassRenderer`
-
-负责串联多个 render pass 与 post-processing pass。
-
-适合在你要做这些事情时使用：
-
-- 先画到离屏纹理
-- 再做后处理
-- 需要多个 pass 顺序执行
 
 ### `ResourceManager`
 

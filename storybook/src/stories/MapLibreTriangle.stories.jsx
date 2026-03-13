@@ -4,7 +4,7 @@ import { TriangleMultiPassLayer } from '@windylib/layers'
 import { cityTriangleVertices } from './constants'
 
 const meta = {
-  title: 'Maps/DeckGL Triangle MultiPass',
+  title: 'Maps/MapLibre Triangle MultiPass',
   component: MapLibreTriangleMap,
   tags: ['autodocs'],
   parameters: {

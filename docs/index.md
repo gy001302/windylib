@@ -13,17 +13,17 @@ WindyLib 是一套面向地图场景的三角形叠加渲染库。
 
 - [快速开始](./guide/getting-started)
 - [架构设计](./guide/architecture)
-- [TriangleLayer 使用](./guide/triangle-layer)
+- [Triangle 图层](./guide/triangle-layer)
 - [Leaflet 接入](./guide/leaflet-integration)
 - [MapLibre 接入](./guide/maplibre-integration)
 - [API 总览](./api/overview)
 
 ## 当前方向
 
-当前的核心抽象是 `TriangleLayer`。
+当前的核心公开图层是 `TriangleMultiPassLayer`。
 
-- `TriangleLayer` 是统一的三角形渲染实现
-- `TriangleMultiPassLayer` 在其上扩展后处理能力，例如反色
+- 同一个类同时支持 Leaflet overlay canvas 和 MapLibre shared WebGL
+- `invertEnabled` 打开时会自动启用反色后处理
 - 地图包只负责宿主和适配，不再各自维护一套三角形实现
 
 ## 推荐阅读路径
@@ -32,6 +32,6 @@ WindyLib 是一套面向地图场景的三角形叠加渲染库。
 
 1. [快速开始](./guide/getting-started)
 2. [架构设计](./guide/architecture)
-3. [TriangleLayer 使用](./guide/triangle-layer)
+3. [Triangle 图层](./guide/triangle-layer)
 4. [Leaflet 接入](./guide/leaflet-integration) 或 [MapLibre 接入](./guide/maplibre-integration)
 5. [API 总览](./api/overview)

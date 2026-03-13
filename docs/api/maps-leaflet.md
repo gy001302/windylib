@@ -39,4 +39,4 @@ const host = new LeafletCanvasHost({
 })
 ```
 
-当它与 `CanvasOverlayRendererHost` 搭配时，就可以承载 `TriangleLayer` 的渲染输出。
+当它与 `CanvasOverlayRendererHost` 搭配时，就可以承载 `TriangleMultiPassLayer` 的渲染输出。

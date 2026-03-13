@@ -1,13 +1,17 @@
 # Leaflet 接入
 
-Leaflet 目前通过 overlay canvas 的方式接入 `TriangleLayer`。
+Leaflet 目前通过 overlay canvas 的方式接入 `TriangleMultiPassLayer`。
 
 这条链路的职责分工很清晰：
 
 - `LeafletMapAdapter`：把 Leaflet 地图 API 规整成统一适配器
 - `LeafletCanvasHost`：创建并管理地图上方的 canvas
 - `CanvasOverlayRendererHost`：负责 WebGL2 设备与渲染调度
-- `TriangleLayer`：真正执行三角形绘制
+- `TriangleMultiPassLayer`：执行三角形绘制，并在需要时执行后处理
+
+## 在线预览
+
+<iframe src="/examples/leaflet-triangle.html" style="width:100%;height:760px;border:1px solid #d7d3c8;border-radius:12px;background:#fff;"></iframe>
 
 ## 渲染链路
 
@@ -16,7 +20,7 @@ Leaflet 目前通过 overlay canvas 的方式接入 `TriangleLayer`。
 1. 创建 Leaflet 地图
 2. 创建 `LeafletMapAdapter`
 3. 创建 `LeafletCanvasHost`
-4. 创建 `TriangleLayer`
+4. 创建 `TriangleMultiPassLayer`
 5. 用 `CanvasOverlayRendererHost` 把 host 和 layer 连接起来
 
 ## 示例
@@ -24,7 +28,7 @@ Leaflet 目前通过 overlay canvas 的方式接入 `TriangleLayer`。
 ```js
 import L from 'leaflet'
 import { CanvasOverlayRendererHost } from '@windylib/core'
-import { TriangleLayer } from '@windylib/layers'
+import { TriangleMultiPassLayer } from '@windylib/layers'
 import { LeafletCanvasHost, LeafletMapAdapter } from '@windylib/maps-leaflet'
 
 const map = L.map(container, {
@@ -37,7 +41,7 @@ const canvasHost = new LeafletCanvasHost({
   mapAdapter: new LeafletMapAdapter(map),
 })
 
-const layer = new TriangleLayer({
+const layer = new TriangleMultiPassLayer({
   id: 'leaflet-triangle',
   vertices: [
     [116.38, 39.9, 1],
@@ -79,4 +83,4 @@ rendererHost.invalidate()
 
 - 绘制发生在 overlay canvas，而不是底图内部
 - 与地图自身图层的深度关系比较弱
-- 更复杂的合成效果需要额外设计
+- 更复杂的多 pass 效果仍然更适合放在 MapLibre 这类共享 WebGL 上下文里

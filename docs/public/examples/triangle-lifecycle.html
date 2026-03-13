@@ -1,0 +1,316 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>WindyLib Example - Triangle Lifecycle</title>
+    <style>
+      :root {
+        color-scheme: light;
+        font-family: "IBM Plex Sans", "Segoe UI", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html, body {
+        margin: 0;
+        min-height: 100%;
+      }
+
+      body {
+        background: #f5f1e8;
+        color: #1f1a14;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .page {
+        min-height: 100vh;
+      }
+
+      .nav {
+        padding: 16px 20px;
+        border-bottom: 1px solid rgba(31, 26, 20, 0.12);
+        background: rgba(255, 255, 255, 0.72);
+        backdrop-filter: blur(8px);
+      }
+
+      .split {
+        display: grid;
+        grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+        min-height: calc(100vh - 61px);
+      }
+
+      .panel {
+        padding: 20px;
+        border-right: 1px solid rgba(31, 26, 20, 0.12);
+        background: #f5f1e8;
+      }
+
+      .panel.dark {
+        background: #101820;
+        color: #f5f7fa;
+      }
+
+      .stage {
+        min-height: calc(100vh - 61px);
+      }
+
+      .map {
+        width: 100%;
+        height: calc(100vh - 61px);
+      }
+
+      .map.fit {
+        height: 100%;
+        min-height: calc(100vh - 61px);
+      }
+
+      .field {
+        display: grid;
+        gap: 6px;
+        margin-bottom: 14px;
+      }
+
+      .field label {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        opacity: 0.72;
+      }
+
+      .field input {
+        width: 100%;
+      }
+
+      .field.checkbox {
+        grid-template-columns: auto 1fr;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .field.checkbox label {
+        font-size: 14px;
+        text-transform: none;
+        letter-spacing: 0;
+        opacity: 1;
+      }
+
+      pre {
+        margin: 0;
+        padding: 16px;
+        background: rgba(15, 23, 32, 0.96);
+        color: #f6f7f9;
+        overflow: auto;
+        white-space: pre-wrap;
+        font: 12px/1.6 "IBM Plex Mono", "Fira Code", monospace;
+      }
+
+      .cards {
+        display: grid;
+        gap: 16px;
+      }
+
+      .grid {
+        display: grid;
+        gap: 20px;
+      }
+
+      .intro {
+        max-width: 920px;
+        margin: 0 auto;
+        padding: 32px 20px 48px;
+      }
+
+      .intro h1 {
+        margin: 0 0 12px;
+        font-size: 32px;
+      }
+
+      .intro p {
+        margin: 0 0 24px;
+        opacity: 0.8;
+      }
+
+      .links {
+        display: grid;
+        gap: 14px;
+      }
+
+      .link-card {
+        display: block;
+        padding: 18px 20px;
+        border: 1px solid rgba(31, 26, 20, 0.12);
+        border-radius: 14px;
+        background: rgba(255, 255, 255, 0.8);
+        text-decoration: none;
+      }
+
+      .link-card strong {
+        display: block;
+        margin-bottom: 6px;
+      }
+
+      .small {
+        font-size: 12px;
+        opacity: 0.72;
+      }
+    </style>
+    
+    <link rel="stylesheet" href="https://unpkg.com/maplibre-gl@5.19.0/dist/maplibre-gl.css" />
+    <script src="https://unpkg.com/maplibre-gl@5.19.0/dist/maplibre-gl.js"></script>
+  </head>
+  <body>
+    
+    <div class="page">
+      <div class="nav"><a href="./index.html">Examples</a> / Foundations / Triangle Lifecycle</div>
+      <div class="split">
+        <aside class="panel">
+          <div class="field checkbox">
+            <input id="lifecycle-invert" type="checkbox" checked />
+            <label for="lifecycle-invert">Invert Pass</label>
+          </div>
+          <div class="cards">
+            <div>
+              <div class="small" style="margin-bottom:8px;">Lifecycle</div>
+              <pre id="lifecycle-state"></pre>
+            </div>
+            <div>
+              <div class="small" style="margin-bottom:8px;">Shader</div>
+              <pre id="shader-state"></pre>
+            </div>
+            <div>
+              <div class="small" style="margin-bottom:8px;">Pass</div>
+              <pre id="pass-state"></pre>
+            </div>
+          </div>
+        </aside>
+        <main class="stage">
+          <div id="map" class="map"></div>
+        </main>
+      </div>
+    </div>
+    <script>
+      (function suppressKnownLumaWarning() {
+        const originalError = console.error;
+        const ignoredFragment = 'This version of luma.gl has already been initialized';
+        console.error = function patchedConsoleError(...args) {
+          if (args.some((arg) => String(arg).includes(ignoredFragment))) {
+            return;
+          }
+          return originalError.apply(this, args);
+        };
+      }());
+    </script>
+    <script src="../sdk/wl-all.umd.js"></script>
+    <script>
+
+      
+      function createMap(container, options = {}) {
+        const map = new maplibregl.Map({
+          container,
+          style: 'https://demotiles.maplibre.org/style.json',
+          center: options.center ?? [117.03666666666668, 31.42],
+          zoom: options.zoom ?? 4.2,
+          canvasContextAttributes: { antialias: true },
+          pitch: options.pitch ?? 0,
+          bearing: options.bearing ?? 0,
+        });
+
+        map.addControl(new maplibregl.NavigationControl(), 'top-left');
+        map.addControl(new maplibregl.GlobeControl(), 'top-left');
+        return map;
+      }
+  
+      const lifecycleEl = document.getElementById('lifecycle-state');
+      const shaderEl = document.getElementById('shader-state');
+      const passEl = document.getElementById('pass-state');
+      const lifecycleEvents = [];
+
+      function writeJson(element, value) {
+        element.textContent = JSON.stringify(value, null, 2);
+      }
+
+      const map = createMap(document.getElementById('map'), {
+        zoom: 4.2,
+      });
+
+      const host = new WindyLib.MapLibreTriangleHost({
+        map,
+        id: 'triangle-lifecycle-demo',
+        vertices: [
+  [
+    116.38,
+    39.9,
+    1
+  ],
+  [
+    121.47,
+    31.23,
+    1
+  ],
+  [
+    113.26,
+    23.13,
+    1
+  ]
+],
+        zoom: 4.2,
+        color: '#ff6f3c',
+        alpha: 0.86,
+        invertEnabled: true,
+        vertexShader: WindyLib.TriangleMultiPassLayer.defaultVertexShader,
+        fragmentShader: WindyLib.TriangleMultiPassLayer.defaultFragmentShader,
+        onLifecycleStateChange(event) {
+          lifecycleEvents.unshift(event);
+          lifecycleEvents.splice(8);
+          writeJson(lifecycleEl, lifecycleEvents);
+        },
+        onShaderStateChange(event) {
+          writeJson(shaderEl, event);
+        },
+        onPassStateChange(event) {
+          writeJson(passEl, event);
+        },
+      });
+
+      host.attach();
+      writeJson(lifecycleEl, lifecycleEvents);
+      writeJson(shaderEl, null);
+      writeJson(passEl, null);
+
+      document.getElementById('lifecycle-invert').addEventListener('change', (event) => {
+        host.setProps({
+          vertices: [
+  [
+    116.38,
+    39.9,
+    1
+  ],
+  [
+    121.47,
+    31.23,
+    1
+  ],
+  [
+    113.26,
+    23.13,
+    1
+  ]
+],
+          zoom: 4.2,
+          color: '#ff6f3c',
+          alpha: 0.86,
+          invertEnabled: event.target.checked,
+          vertexShader: WindyLib.TriangleMultiPassLayer.defaultVertexShader,
+          fragmentShader: WindyLib.TriangleMultiPassLayer.defaultFragmentShader,
+        });
+      });
+    
+    </script>
+  </body>
+</html>

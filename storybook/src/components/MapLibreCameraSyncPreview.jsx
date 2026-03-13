@@ -1,10 +1,13 @@
 import { useEffect, useState, useRef } from 'react'
+import * as maplibregl from 'maplibre-gl'
 import { SimpleCameraService } from '@windylib/core'
 import { MapLibreCameraSync, MapLibreLayerHost } from '@windylib/maps-maplibre'
 
 function formatJson(value) {
   return JSON.stringify(value, null, 2)
 }
+
+const DEFAULT_STYLE = 'https://demotiles.maplibre.org/style.json'
 
 export function MapLibreCameraSyncPreview(props) {
   const hostRef = useRef(null)
@@ -18,15 +21,27 @@ export function MapLibreCameraSyncPreview(props) {
     }
 
     const cameraService = new SimpleCameraService()
-    const mapHost = new MapLibreLayerHost({
+    const map = new maplibregl.Map({
       container: hostRef.current,
+      style: DEFAULT_STYLE,
+      center: [props.centerLng, props.centerLat],
+      zoom: props.zoom,
+      canvasContextAttributes: { antialias: true },
+      pitch: props.pitch,
+      bearing: props.bearing,
+    })
+
+    map.addControl(new maplibregl.NavigationControl(), 'top-left')
+    map.addControl(new maplibregl.GlobeControl(), 'top-left')
+
+    const mapHost = new MapLibreLayerHost({
+      map,
       initialProps: {
         vertices: [
           [props.centerLng, props.centerLat, 0],
         ],
         zoom: props.zoom,
       },
-      controls: true,
       createLayer: () => null,
     })
 
@@ -70,6 +85,7 @@ export function MapLibreCameraSyncPreview(props) {
     return () => {
       sync.detach()
       mapHost.detach()
+      map.remove()
     }
   }, [])
 

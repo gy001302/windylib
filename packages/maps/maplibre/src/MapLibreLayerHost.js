@@ -1,71 +1,55 @@
-import * as maplibregl from 'maplibre-gl'
 import { MapHost } from '../../shared/MapHost'
+import { MapLibreMapAdapter } from './MapLibreMapAdapter.js'
 import { getMapCenter } from './utils'
-
-const DEFAULT_STYLE = 'https://demotiles.maplibre.org/style.json'
 
 export class MapLibreLayerHost extends MapHost {
   constructor(options = {}) {
     super(options)
     const {
-      container,
+      map,
+      mapAdapter,
       createLayer,
-      style = DEFAULT_STYLE,
       projection = 'globe',
-      controls = true,
     } = options
 
-    if (!container) {
-      throw new Error('MapLibreLayerHost: container is required.')
+    if (!map) {
+      throw new Error('MapLibreLayerHost: map is required.')
     }
-    this.container = container
+
+    this.map = map
+    this.mapAdapter = mapAdapter ?? new MapLibreMapAdapter(map)
     this.createLayer = typeof createLayer === 'function' ? createLayer : null
-    this.style = style
     this.projection = projection
-    this.controls = controls
-    this.map = null
     this.layer = null
+    this.attached = false
+    this._handleLoad = this._addLayerIfReady.bind(this)
+    this._handleStyleLoad = this._syncProjectionAndLayer.bind(this)
   }
 
   attach() {
-    if (this.map) {
+    if (this.attached) {
       return this
     }
 
-    this.map = new maplibregl.Map({
-      container: this.container,
-      style: this.style,
-      center: getMapCenter(this.props.vertices),
-      zoom: this.props.zoom,
-      canvasContextAttributes: { antialias: true },
-      pitch: 0,
-      bearing: 0,
-    })
-
-    if (this.controls) {
-      this.map.addControl(new maplibregl.NavigationControl(), 'top-left')
-      this.map.addControl(new maplibregl.GlobeControl(), 'top-left')
-    }
-
+    this.attached = true
     this.layer = this.createLayer?.(this.props) ?? null
-
-    this.map.on('style.load', () => {
-      this.map?.setProjection({ type: this.projection })
-    })
-
-    this.map.on('load', () => {
-      if (this.layer) {
-        this.map?.addLayer(this.layer)
-      }
-    })
+    this.map.on('load', this._handleLoad)
+    this.map.on('style.load', this._handleStyleLoad)
+    this._syncProjectionAndLayer()
 
     return this
   }
 
   detach() {
-    this.map?.remove()
-    this.map = null
+    if (!this.attached) {
+      return this
+    }
+
+    this.map.off('load', this._handleLoad)
+    this.map.off('style.load', this._handleStyleLoad)
+    this._removeLayer()
     this.layer = null
+    this.attached = false
     return this
   }
 
@@ -90,7 +74,7 @@ export class MapLibreLayerHost extends MapHost {
   }
 
   requestRender() {
-    this.map?.triggerRepaint()
+    this.map?.triggerRepaint?.()
   }
 
   getMap() {
@@ -98,7 +82,7 @@ export class MapLibreLayerHost extends MapHost {
   }
 
   getMapAdapter() {
-    return null
+    return this.mapAdapter
   }
 
   getHostKind() {
@@ -107,5 +91,37 @@ export class MapLibreLayerHost extends MapHost {
 
   supportsSharedCanvas() {
     return true
+  }
+
+  _syncProjectionAndLayer() {
+    if (!this.map) {
+      return
+    }
+
+    if (this.projection && this.map.setProjection) {
+      this.map.setProjection({ type: this.projection })
+    }
+
+    this._addLayerIfReady()
+  }
+
+  _addLayerIfReady() {
+    if (!this.map || !this.layer || !this.map.isStyleLoaded?.()) {
+      return
+    }
+
+    if (this.layer.id && this.map.getLayer?.(this.layer.id)) {
+      return
+    }
+
+    this.map.addLayer(this.layer)
+  }
+
+  _removeLayer() {
+    if (!this.map || !this.layer?.id || !this.map.getLayer?.(this.layer.id)) {
+      return
+    }
+
+    this.map.removeLayer(this.layer.id)
   }
 }

@@ -4,7 +4,7 @@ import process from 'node:process'
 import { chromium } from 'playwright'
 
 const DEFAULT_URL = process.env.STORYBOOK_URL || 'http://127.0.0.1:6006'
-const DEFAULT_STORY_ID = process.env.STORYBOOK_STORY_ID || 'debuggers-deckgl-triangle-multi-pass--default'
+const DEFAULT_STORY_ID = process.env.STORYBOOK_STORY_ID || 'maps-maplibre-triangle-multi-pass--default'
 const POLL_INTERVAL_MS = 1000
 const STARTUP_TIMEOUT_MS = 30000
 
