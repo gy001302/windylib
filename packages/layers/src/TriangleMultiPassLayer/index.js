@@ -1,12 +1,10 @@
-/* eslint-disable max-classes-per-file */
 import { Texture } from '@luma.gl/core'
-import { TriangleLayer } from '../TriangleLayer'
 import {
-  BasePass,
+  BaseLayer,
   FullscreenPostProcessingPass,
-  MultiPassRenderer,
   ResourceManager,
 } from '@windylib/core'
+import { TriangleLayer } from '../TriangleLayer'
 
 const INVERT_FRAGMENT_SHADER = `#version 300 es
 precision highp float;
@@ -23,154 +21,19 @@ void main() {
   fragColor = vec4(1.0 - color.rgb, color.a);
 }`
 
-function samplePixels(device, source, size) {
-  const sampleWidth = Math.max(1, Math.min(4, Math.floor(size.width || 1)))
-  const sampleHeight = Math.max(1, Math.min(4, Math.floor(size.height || 1)))
-
-  try {
-    const pixels = device.readPixelsToArrayWebGL(source, {
-      sourceX: 0,
-      sourceY: 0,
-      sourceWidth: sampleWidth,
-      sourceHeight: sampleHeight,
-    })
-
-    return {
-      width: sampleWidth,
-      height: sampleHeight,
-      values: Array.from(pixels).slice(0, sampleWidth * sampleHeight * 4),
-    }
-  } catch (error) {
-    return {
-      width: sampleWidth,
-      height: sampleHeight,
-      error: error.message,
-    }
-  }
-}
-
-class TriangleRenderPass extends BasePass {
-  constructor(props = {}) {
-    super(props)
-    this.renderToScreen = props.renderToScreen ?? false
-  }
-
-  init({ layer }) {
-    layer.props.onPassStateChange?.({
-      passId: this.id,
-      stage: 'compile',
-      target: this.renderToScreen ? 'screen' : 'framebuffer',
-    })
-  }
-
-  render({
-    layer,
-    device,
-    resources,
-    size,
-    shaderDescription,
-    projectionData,
-  }) {
-    if (!shaderDescription || !projectionData) {
-      return null
-    }
-
-    if (this.renderToScreen) {
-      const renderPass = device.beginRenderPass({
-        id: `${layer.id}-render-pass-screen`,
-        clearColor: false,
-        clearDepth: false,
-        clearStencil: false,
-      })
-
-      try {
-        layer.drawToRenderPass({
-          renderPass,
-          shaderDescription,
-          projectionData,
-          color: layer.props.color,
-        })
-      } finally {
-        renderPass.end()
-      }
-
-      layer.props.onPassStateChange?.({
-        passId: this.id,
-        stage: 'render',
-        target: 'screen',
-        size,
-      })
-
-      return null
-    }
-
-    const textureId = `${layer.id}-offscreen-texture`
-    const colorTexture = resources.getTexture(textureId, {
-      width: size.width,
-      height: size.height,
-      format: 'rgba8unorm',
-      usage: Texture.SAMPLE | Texture.RENDER | Texture.COPY_SRC | Texture.COPY_DST,
-      sampler: {
-        minFilter: 'linear',
-        magFilter: 'linear',
-      },
-    })
-    const framebuffer = resources.getFramebuffer(`${layer.id}-offscreen`, {
-      width: size.width,
-      height: size.height,
-      colorAttachments: [colorTexture],
-    })
-    resources.resizeFramebuffer(`${layer.id}-offscreen`, size)
-
-    const renderPass = device.beginRenderPass({
-      id: `${layer.id}-render-pass-offscreen`,
-      framebuffer,
-      clearColor: [0, 0, 0, 0],
-      clearDepth: false,
-      clearStencil: false,
-    })
-
-    try {
-      layer.drawToRenderPass({
-        renderPass,
-        shaderDescription,
-        projectionData,
-        color: layer.props.color,
-      })
-    } finally {
-      renderPass.end()
-    }
-
-    layer.props.onPassStateChange?.({
-      passId: this.id,
-      stage: 'render',
-      target: 'framebuffer',
-      size,
-      pixelSample: samplePixels(device, framebuffer, size),
-    })
-
-    return colorTexture
-  }
-}
-
 class InvertPass extends FullscreenPostProcessingPass {
   getFragmentShader() {
     return INVERT_FRAGMENT_SHADER
   }
 }
 
-export class TriangleMultiPassLayer extends TriangleLayer {
+export class TriangleMultiPassLayer extends BaseLayer {
   static componentName = 'TriangleMultiPassLayer'
 
   static layerName = 'TriangleMultiPassLayer'
 
   static defaultProps = {
     ...TriangleLayer.defaultProps,
-    invertEnabled: {
-      type: 'boolean',
-      value: false,
-      compare: true,
-    },
     onPassStateChange: {
       type: 'function',
       value: null,
@@ -184,67 +47,183 @@ export class TriangleMultiPassLayer extends TriangleLayer {
 
   constructor(props = {}) {
     super(props)
+    this.triangleLayer = new TriangleLayer(this.props)
     this.resourceManager = null
-    this.multiPassRenderer = null
+    this.postProcessingPasses = []
   }
 
-  _onDeviceReady() {
-    this.resourceManager = new ResourceManager(this.device)
-    this.multiPassRenderer = new MultiPassRenderer({
+  onPropsChange({ oldProps, nextProps }) {
+    this.triangleLayer.setProps(nextProps)
+
+    if (
+      this.device
+      && nextProps.invertEnabled !== undefined
+      && nextProps.invertEnabled !== oldProps.invertEnabled
+    ) {
+      this._rebuildPasses()
+    }
+  }
+
+  onDeviceReady() {
+    this.triangleLayer.onAdd({
       device: this.device,
-      resources: this.resourceManager,
+      map: this.map,
+      gl: this.gl,
+      host: {
+        invalidate: () => this.requestRender(),
+      },
     })
-    this.configurePasses()
+
+    this.resourceManager = new ResourceManager(this.device)
+    this._rebuildPasses()
   }
 
-  onLayerPropsChange({ props, oldProps, shaderChanged }) {
-    if (!this.multiPassRenderer) {
+  onDeviceError(error) {
+    this.triangleLayer.onDeviceError(error)
+  }
+
+  onBeforeRemove() {
+    this._destroyPasses()
+    this.resourceManager?.destroy()
+    this.resourceManager = null
+    this.triangleLayer.onRemove({
+      device: this.device,
+      map: this.map,
+      gl: this.gl,
+    })
+  }
+
+  render(frameOrGl, args) {
+    if (args === undefined && frameOrGl?.project) {
+      this.triangleLayer.render(frameOrGl)
       return
     }
 
-    if (props.invertEnabled !== oldProps.invertEnabled || shaderChanged) {
-      this.configurePasses()
+    if (!this.device || !args?.shaderData || !args?.defaultProjectionData) {
+      return
     }
 
-    this.multiPassRenderer.updatePasses(this, {
-      props,
-      oldProps,
-      changeFlags: {},
+    const renderContext = {
+      shaderDescription: args.shaderData,
+      projectionData: args.defaultProjectionData,
+      size: this.triangleLayer.getRenderSize(frameOrGl),
+    }
+
+    if (!this.postProcessingPasses.length) {
+      this._emitPassState({
+        passId: 'render-pass',
+        stage: 'render',
+        target: 'screen',
+        size: renderContext.size,
+      })
+      this.triangleLayer.renderLayer(frameOrGl, renderContext)
+      return
+    }
+
+    const input = this.renderToTexture(renderContext)
+    this.renderPostProcessingPasses(input, renderContext.size)
+  }
+
+  renderToTexture(renderContext) {
+    const textureId = `${this.id}-offscreen-texture`
+    const framebufferId = `${this.id}-offscreen-framebuffer`
+    const colorTexture = this.resourceManager.getTexture(textureId, {
+      width: renderContext.size.width,
+      height: renderContext.size.height,
+      format: 'rgba8unorm',
+      usage: Texture.SAMPLE | Texture.RENDER | Texture.COPY_SRC | Texture.COPY_DST,
+      sampler: {
+        minFilter: 'linear',
+        magFilter: 'linear',
+      },
+    })
+    const framebuffer = this.resourceManager.getFramebuffer(framebufferId, {
+      width: renderContext.size.width,
+      height: renderContext.size.height,
+      colorAttachments: [colorTexture],
+    })
+
+    this.resourceManager.resizeFramebuffer(framebufferId, renderContext.size)
+
+    const renderPass = this.device.beginRenderPass({
+      id: `${this.id}-render-pass-offscreen`,
+      framebuffer,
+      clearColor: [0, 0, 0, 0],
+      clearDepth: false,
+      clearStencil: false,
+    })
+
+    try {
+      this.triangleLayer.drawToRenderPass({
+        renderPass,
+        ...renderContext,
+        color: this.props.color,
+      })
+    } finally {
+      renderPass.end()
+    }
+
+    this._emitPassState({
+      passId: 'render-pass',
+      stage: 'render',
+      target: 'framebuffer',
+      size: renderContext.size,
+    })
+
+    return colorTexture
+  }
+
+  renderPostProcessingPasses(initialInput, size) {
+    let input = initialInput
+
+    this.postProcessingPasses.forEach((pass, index) => {
+      pass.setRenderToScreen(index === this.postProcessingPasses.length - 1)
+      input = pass.render({
+        layer: this,
+        device: this.device,
+        resources: this.resourceManager,
+        size,
+        input,
+      })
     })
   }
 
-  createPasses() {
+  createPostProcessingPasses() {
+    if (!this.props.invertEnabled) {
+      return []
+    }
+
     return [
-      new TriangleRenderPass({
-        id: 'render-pass',
-        renderToScreen: !this.props.invertEnabled,
+      new InvertPass({
+        id: 'invert-pass',
       }),
     ]
   }
 
-  createPostProcessingPasses() {
-    return this.props.invertEnabled ? [new InvertPass({ id: 'invert-pass' })] : []
+  _rebuildPasses() {
+    this._destroyPasses()
+    this.postProcessingPasses = this.createPostProcessingPasses()
+    this.postProcessingPasses.forEach((pass) => {
+      pass.init({
+        layer: this,
+        device: this.device,
+        resources: this.resourceManager,
+      })
+    })
   }
 
-  configurePasses() {
-    this.multiPassRenderer?.setPasses([
-      ...this.createPasses(),
-      ...this.createPostProcessingPasses(),
-    ], this)
+  _destroyPasses() {
+    this.postProcessingPasses.forEach((pass) => {
+      pass.destroy({
+        layer: this,
+        device: this.device,
+        resources: this.resourceManager,
+      })
+    })
+    this.postProcessingPasses = []
   }
 
-  renderLayer(gl, renderContext) {
-    if (!this.multiPassRenderer) {
-      return
-    }
-
-    this.multiPassRenderer.render(this, renderContext)
-  }
-
-  _onBeforeRemove() {
-    this.multiPassRenderer?.destroy(this)
-    this.multiPassRenderer = null
-    this.resourceManager?.destroy()
-    this.resourceManager = null
+  _emitPassState(event) {
+    this.props.onPassStateChange?.(event)
   }
 }
