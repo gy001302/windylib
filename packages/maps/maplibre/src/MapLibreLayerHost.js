@@ -35,7 +35,10 @@ export class MapLibreLayerHost extends MapHost {
     this.layer = this.createLayer?.(this.props) ?? null
     this.map.on('load', this._handleLoad)
     this.map.on('style.load', this._handleStyleLoad)
-    this._syncProjectionAndLayer()
+
+    if (this.map.isStyleLoaded?.()) {
+      this._syncProjectionAndLayer()
+    }
 
     return this
   }
@@ -98,7 +101,7 @@ export class MapLibreLayerHost extends MapHost {
       return
     }
 
-    if (this.projection && this.map.setProjection) {
+    if (this.projection && this.map.setProjection && this.map.isStyleLoaded?.()) {
       this.map.setProjection({ type: this.projection })
     }
 
